@@ -59,7 +59,6 @@ def main(start_str, end_str, height, save_dir):
     location_csv = '/Users/garzio/Documents/repo/rucool/wind-science/capacity_factor_analysis/files/lease_centroids.csv'
     loc_df = pd.read_csv(location_csv)
     for i, row in loc_df.iterrows():
-        #if row.state == 'New Jersey':
         if np.logical_or(row.state == 'New Jersey', row.state == 'NY/NJ'):
             data = dict(time=np.array([], dtype='datetime64[ns]'),
                         u=np.array([]),
@@ -67,6 +66,9 @@ def main(start_str, end_str, height, save_dir):
 
             data['company'] = row.company
             data['code'] = row.code
+            data['state'] = row.state
+            data['lease'] = row.lease
+            lease_code = row.lease.split(' - ')[0]
 
             midlon = row['long']
             midlat = row['lat']
@@ -90,7 +92,7 @@ def main(start_str, end_str, height, save_dir):
                 data['u'] = np.append(data['u'], ds_point_height.sel(time=tm)['U'].values)
                 data['v'] = np.append(data['v'], ds_point_height.sel(time=tm)['V'].values)
 
-            pickle_name = os.path.join(save_dir, f'{row["code"]}-{start_str}_{end_str}.pickle')
+            pickle_name = os.path.join(save_dir, f'{lease_code}-{start_str}_{end_str}.pickle')
             with open(pickle_name, 'wb') as handle:
                 pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
             print(f'Finished downloading {row["code"]}\n')
