@@ -2,7 +2,7 @@
 
 """
 Author: Laura Nazzaro on 11/10/2022 (modified from lgarzio timeseries_plots.py)
-Last modified: Laura Nazzaro 11/10/2022
+Last modified: Lori Garzio 11/11/2022
 Generate grouped summary statistics and boxplots of windspeed, power, and capacity factor
 """
 
@@ -35,16 +35,24 @@ def main(pfiledir, out_file_dir):
         with open(f, 'rb') as handle:
             data = pickle.load(handle)
 
+        lease_code = data['lease'].split(' - ')[0]
+
         # calculate wind speed
         data['speed'] = wind_uv_to_spd(data['u'], data['v'])
         lon = np.round(np.unique(data['wrf_lon'])[0], 2)
         lat = np.round(np.unique(data['wrf_lat'])[0], 2)
 
         # calculate wind power and capacity factor
-        power_curve = os.path.join(pfiledir, 'wrf_lw15mw_power.csv')
+        power_curve = '/Users/garzio/Documents/rucool/bpu/wrf/wrf_lw15mw_power.csv'
         pc = pd.read_csv(power_curve)
         data['power'] = np.interp(data['speed'], pc['Wind Speed'], pc['Power'])
         data['capacity_factor'] = data['power'] / 15000
+
+        # set up save directories
+        csv_savedir = os.path.join(out_file_dir, 'csv')
+        img_savedir = os.path.join(out_file_dir, 'images')
+        os.makedirs(csv_savedir, exist_ok=True)
+        os.makedirs(img_savedir, exist_ok=True)
 
         # assign to dataframe and add month and season
         df = pd.DataFrame.from_dict(data)
@@ -56,31 +64,29 @@ def main(pfiledir, out_file_dir):
         df.loc[np.logical_and(df['month']>=3,df['month']<=5), 'season'] = 'spring'
         df.loc[np.logical_and(df['month']>=6,df['month']<=8), 'season'] = 'summer'
         df.loc[np.logical_and(df['month']>=9,df['month']<=11), 'season'] = 'fall'
-        df.to_csv(os.path.join(out_file_dir,'csv',f'{data["code"]}-ruwrf-timeseries.csv'))
+        df.to_csv(os.path.join(csv_savedir, f'{lease_code}-ruwrf-timeseries.csv'))
 
         keyvars = ['speed','power','capacity_factor']
         groupvars = ['month','season']
 
         for gv in groupvars:
-            print(f'getting summary stats for {data["code"]} by {gv}')
+            print(f'getting summary stats for {lease_code} by {gv}')
             all_vars = keyvars.copy()
             all_vars.append(gv)
             stats = df[all_vars].groupby(gv).describe()
-            stats.to_csv(os.path.join(out_file_dir,'csv',f'{data["code"]}-summary_stats_by_{gv}.csv'))
+            stats.to_csv(os.path.join(csv_savedir, f'{lease_code}-summary_stats_by_{gv}.csv'))
             #fig, ax = plt.subplots(figsize=(12,7))
             df.boxplot(column=keyvars, by=gv, sharex=True, sharey=False, notch=True, fontsize=8, figsize=(12,4), layout=(1,3), boxprops=dict(linewidth=1.25),medianprops=dict(linewidth=3,color='green'),flierprops=dict(marker='x'),whiskerprops=dict(linewidth=1.25))
-            plt.suptitle('') 
-            plt.savefig(os.path.join(out_file_dir,'images',f'{data["code"]}-wind_by_{gv}.png'),dpi=300)
+            plt.suptitle(' ')
+            plt.savefig(os.path.join(img_savedir, f'{lease_code}-wind_by_{gv}.png'), dpi=300)
             plt.close()
             for kv in keyvars:
-                print(f'plotting {kv} for {data["code"]} by {gv}')
+                print(f'plotting {kv} for {lease_code} by {gv}')
                 fig, ax = plt.subplots(figsize=(12,7))
                 df.boxplot(column=kv, by=gv, ax=ax, notch=True, boxprops=dict(linewidth=1.25),whiskerprops=dict(linewidth=1.25),medianprops=dict(linewidth=3,color='green'),flierprops=dict(marker='x'))
-                plt.suptitle('') 
-                plt.savefig(os.path.join(out_file_dir,'images',f'{data["code"]}-{kv}_by_{gv}.png'),dpi=300)
+                plt.suptitle(f'{data["lease"]}')
+                plt.savefig(os.path.join(img_savedir, f'{lease_code}-{kv}_by_{gv}.png'), dpi=300)
                 plt.close()
-
-
 
 
 if __name__ == '__main__':
