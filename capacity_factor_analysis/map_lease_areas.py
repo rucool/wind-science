@@ -31,7 +31,11 @@ def main(save_file, extent):
     loc_df = pd.read_csv(lease_cent_csv)
     for i, row in loc_df.iterrows():
         if row.state == 'New Jersey':
-            ax.scatter(row['long'], row['lat'], s=20, marker='o', c='cyan', edgecolor='k', transform=ccrs.PlateCarree(), zorder=20)
+            ax.scatter(row['long'], row['lat'], s=20, marker='o', c='cyan', edgecolor='k', transform=ccrs.PlateCarree(),
+                       zorder=20)
+        if row.state == 'NY/NJ':
+            ax.scatter(row['long'], row['lat'], s=20, marker='o', c='magenta', edgecolor='k', transform=ccrs.PlateCarree(),
+                       zorder=20)
 
     plt.savefig(save_file, dpi=200)
     plt.close()

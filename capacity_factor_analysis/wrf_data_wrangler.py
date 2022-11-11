@@ -59,7 +59,8 @@ def main(start_str, end_str, height, save_dir):
     location_csv = '/Users/garzio/Documents/repo/rucool/wind-science/capacity_factor_analysis/files/lease_centroids.csv'
     loc_df = pd.read_csv(location_csv)
     for i, row in loc_df.iterrows():
-        if row.state == 'New Jersey':
+        #if row.state == 'New Jersey':
+        if np.logical_or(row.state == 'New Jersey', row.state == 'NY/NJ'):
             data = dict(time=np.array([], dtype='datetime64[ns]'),
                         u=np.array([]),
                         v=np.array([]))
