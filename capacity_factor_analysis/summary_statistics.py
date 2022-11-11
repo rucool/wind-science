@@ -28,7 +28,7 @@ def wind_uv_to_spd(u, v):
     return wspd
 
 
-def main(pfiledir):
+def main(pfiledir, out_file_dir):
     files = glob.glob(os.path.join(pfiledir, '*.pickle'))
     for f in files:
         print(f'reading {f}')
@@ -56,7 +56,7 @@ def main(pfiledir):
         df.loc[np.logical_and(df['month']>=3,df['month']<=5), 'season'] = 'spring'
         df.loc[np.logical_and(df['month']>=6,df['month']<=8), 'season'] = 'summer'
         df.loc[np.logical_and(df['month']>=9,df['month']<=11), 'season'] = 'fall'
-        df.to_csv(os.path.join(pfiledir,'output','csv',f'{data["code"]}-ruwrf-timeseries.csv'))
+        df.to_csv(os.path.join(out_file_dir,'csv',f'{data["code"]}-ruwrf-timeseries.csv'))
 
         keyvars = ['speed','power','capacity_factor']
         groupvars = ['month','season']
@@ -66,18 +66,18 @@ def main(pfiledir):
             all_vars = keyvars.copy()
             all_vars.append(gv)
             stats = df[all_vars].groupby(gv).describe()
-            stats.to_csv(os.path.join(pfiledir,'output','csv',f'{data["code"]}-summary_stats_by_{gv}.csv'))
+            stats.to_csv(os.path.join(out_file_dir,'csv',f'{data["code"]}-summary_stats_by_{gv}.csv'))
             #fig, ax = plt.subplots(figsize=(12,7))
             df.boxplot(column=keyvars, by=gv, sharex=True, sharey=False, notch=True, fontsize=8, figsize=(12,4), layout=(1,3), boxprops=dict(linewidth=1.25),medianprops=dict(linewidth=3,color='green'),flierprops=dict(marker='x'),whiskerprops=dict(linewidth=1.25))
             plt.suptitle('') 
-            plt.savefig(os.path.join(pfiledir,'output','images',f'{data["code"]}-wind_by_{gv}.png'),dpi=300)
+            plt.savefig(os.path.join(out_file_dir,'images',f'{data["code"]}-wind_by_{gv}.png'),dpi=300)
             plt.close()
             for kv in keyvars:
                 print(f'plotting {kv} for {data["code"]} by {gv}')
                 fig, ax = plt.subplots(figsize=(12,7))
                 df.boxplot(column=kv, by=gv, ax=ax, notch=True, boxprops=dict(linewidth=1.25),whiskerprops=dict(linewidth=1.25),medianprops=dict(linewidth=3,color='green'),flierprops=dict(marker='x'))
                 plt.suptitle('') 
-                plt.savefig(os.path.join(pfiledir,'output','images',f'{data["code"]}-{kv}_by_{gv}.png'),dpi=300)
+                plt.savefig(os.path.join(out_file_dir,'images',f'{data["code"]}-{kv}_by_{gv}.png'),dpi=300)
                 plt.close()
 
 
@@ -85,4 +85,5 @@ def main(pfiledir):
 
 if __name__ == '__main__':
     pckl_file_dir = '/Users/nazzaro/Documents/GitHub/wind-science/capacity_factor_analysis/files'
-    main(pckl_file_dir)
+    out_file_dir = '/Users/nazzaro/Desktop/wind_capacity'
+    main(pckl_file_dir, out_file_dir)
