@@ -24,7 +24,7 @@ long,lat,company,state,lease,code
 -73.30406106,39.54142013,"Community Offshore Wind, LLC",NY/NJ,"OCS-A 0539 - Community Offshore Wind, LLC",community_offshore_wind
 -73.57849887,39.36099059,"Atlantic Shores Offshore Wind Bight, LLC",NY/NJ,"OCS-A 0541 - Atlantic Shores Offshore Wind Bight, LLC",atlantic_shores_offshore
 -73.46109255,39.30381557,Invenergy Wind Offshore LLC,NY/NJ,OCS-A 0542 - Invenergy Wind Offshore LLC,invenergy_wind_offshore
--73.07928612,40.2415736,Mid-Atlantic Offshore Wind LLC,NY/NJ,Provisional - OCS-A 0544 - Mid-Atlantic Offshore Wind LLC,mid-atlantic_offshore_wind
+-73.07928612,40.2415736,Mid-Atlantic Offshore Wind LLC,NY/NJ,OCS-A 0544 - Mid-Atlantic Offshore Wind LLC,mid-atlantic_offshore_wind
 -72.74029799,39.97566861,"OW Ocean Winds East, LLC",NY/NJ,"OCS-A 0537 - OW Ocean Winds East, LLC",ocean_winds_east
--77.83018625,33.44714977,"Duke Energy Renewables Wind, LLC",North Carolina,"OCS - A 0546 - Duke Energy Renewables Wind, LLC",
--77.97947477,33.45103126,"TotalEnergies Renewables USA, LLC",North Carolina,"OCS - A 0545 - TotalEnergies Renewables USA, LLC",
+-77.83018625,33.44714977,"Duke Energy Renewables Wind, LLC",North Carolina,"OCS-A 0546 - Duke Energy Renewables Wind, LLC",
+-77.97947477,33.45103126,"TotalEnergies Renewables USA, LLC",North Carolina,"OCS-A 0545 - TotalEnergies Renewables USA, LLC",
