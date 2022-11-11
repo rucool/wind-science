@@ -35,7 +35,7 @@ def main(pfiledir, save_dir):
             data = pickle.load(handle)
 
         lease_code = data['lease'].split(' - ')[0]
-        img_savedir = os.path.join(save_dir, 'images')
+        img_savedir = os.path.join(save_dir, lease_code, 'timeseries')
         os.makedirs(img_savedir, exist_ok=True)
 
         # calculate and plot wind speed
@@ -79,6 +79,6 @@ def main(pfiledir, save_dir):
 
 
 if __name__ == '__main__':
-    pckl_file_dir = '/Users/garzio/Documents/rucool/bpu/wrf/capacity_factor_analysis/ocean_wind'
-    savedir = '/Users/garzio/Documents/rucool/bpu/wrf/capacity_factor_analysis/ocean_wind'
+    pckl_file_dir = '/Users/garzio/Documents/repo/rucool/wind-science/capacity_factor_analysis/files'
+    savedir = '/Users/garzio/Documents/rucool/bpu/wrf/capacity_factor_analysis/'
     main(pckl_file_dir, savedir)

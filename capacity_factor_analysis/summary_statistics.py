@@ -49,8 +49,8 @@ def main(pfiledir, out_file_dir):
         data['capacity_factor'] = data['power'] / 15000
 
         # set up save directories
-        csv_savedir = os.path.join(out_file_dir, 'csv')
-        img_savedir = os.path.join(out_file_dir, 'images')
+        csv_savedir = os.path.join(out_file_dir, lease_code, 'csv')
+        img_savedir = os.path.join(out_file_dir, lease_code, 'boxplot')
         os.makedirs(csv_savedir, exist_ok=True)
         os.makedirs(img_savedir, exist_ok=True)
 
