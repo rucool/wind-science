@@ -20,11 +20,11 @@ long,lat,company,state,lease,code
 -70.65833961,40.89549055,Park City Wind LLC,Massachussets,OCS-A 0534 - Park City Wind LLC,
 -74.09254511,39.27298755,"Atlantic Shores Offshore Wind Projects 1 & 2, LLC's",New Jersey,"OCS-A 0499 - Atlantic Shores Offshore Wind Projects 1 & 2, LLC's",atlantic_shores_0499
 -74.00408437,39.47223048,"Atlantic Shores Offshore Wind, LLC",New Jersey,"OCS-A 0549 - Atlantic Shores Offshore Wind, LLC",atlantic_shores_0549
--73.17023909,39.71846113,Attentive Energy LLC,NY/NJ,OCS-A 0538 - Attentive Energy LLC,
--73.30406106,39.54142013,"Community Offshore Wind, LLC",NY/NJ,"OCS-A 0539 - Community Offshore Wind, LLC",
--73.57849887,39.36099059,"Atlantic Shores Offshore Wind Bight, LLC",NY/NJ,"OCS-A 0541 - Atlantic Shores Offshore Wind Bight, LLC",
--73.46109255,39.30381557,Invenergy Wind Offshore LLC,NY/NJ,OCS-A 0542 - Invenergy Wind Offshore LLC,
--73.07928612,40.2415736,Mid-Atlantic Offshore Wind LLC,NY/NJ,Provisional - OCS-A 0544 - Mid-Atlantic Offshore Wind LLC,
--72.74029799,39.97566861,"OW Ocean Winds East, LLC",NY/NJ,"OCS-A 0537 - OW Ocean Winds East, LLC",
+-73.17023909,39.71846113,Attentive Energy LLC,NY/NJ,OCS-A 0538 - Attentive Energy LLC,attentive_energy
+-73.30406106,39.54142013,"Community Offshore Wind, LLC",NY/NJ,"OCS-A 0539 - Community Offshore Wind, LLC",community_offshore_wind
+-73.57849887,39.36099059,"Atlantic Shores Offshore Wind Bight, LLC",NY/NJ,"OCS-A 0541 - Atlantic Shores Offshore Wind Bight, LLC",atlantic_shores_offshore
+-73.46109255,39.30381557,Invenergy Wind Offshore LLC,NY/NJ,OCS-A 0542 - Invenergy Wind Offshore LLC,invenergy_wind_offshore
+-73.07928612,40.2415736,Mid-Atlantic Offshore Wind LLC,NY/NJ,Provisional - OCS-A 0544 - Mid-Atlantic Offshore Wind LLC,mid-atlantic_offshore_wind
+-72.74029799,39.97566861,"OW Ocean Winds East, LLC",NY/NJ,"OCS-A 0537 - OW Ocean Winds East, LLC",ocean_winds_east
 -77.83018625,33.44714977,"Duke Energy Renewables Wind, LLC",North Carolina,"OCS - A 0546 - Duke Energy Renewables Wind, LLC",
 -77.97947477,33.45103126,"TotalEnergies Renewables USA, LLC",North Carolina,"OCS - A 0545 - TotalEnergies Renewables USA, LLC",
