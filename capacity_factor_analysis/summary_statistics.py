@@ -123,8 +123,12 @@ def main(pfiledir, pfilepattern, out_file_dir):
                 if gv=='month':
                     dfgroup.loc[dfgroup['month']==12,'order_var']=0
                     dfgroup['order_var']+=1
-                    xt = list(range(1,13))
-                    xl = ['Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov']
+                    if t0.strftime("%Y%m%d") == '20190101':
+                        xt = list(range(1, 12))
+                        xl = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov']
+                    else:
+                        xt = list(range(1,13))
+                        xl = ['Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov']
                 else:
                     xl = list(range(np.min(dfgroup[gv]),np.max(dfgroup[gv]+1)))
                     xt = [x+1-min(xl) for x in xl]
