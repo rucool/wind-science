@@ -2,7 +2,7 @@
 
 """
 Author: Laura Nazzaro on 11/10/2022 (modified from lgarzio timeseries_plots.py)
-Last modified: Lori Garzio 11/11/2022
+Last modified: Laura Nazzaro 11/16/2022
 Generate grouped summary statistics and boxplots of windspeed, power, and capacity factor
 """
 
@@ -75,6 +75,7 @@ def main(pfiledir, pfilepattern, out_file_dir):
         os.makedirs(heatmap_savedir, exist_ok=True)
 
         df = pd.DataFrame(all_data[all_data['lease_code']==lease_code])
+        lease_name=np.unique(df['lease'])[0]
         df['year'] = df['time'].dt.year
         df['month'] = df['time'].dt.month
         df['season'] = np.nan
@@ -100,14 +101,21 @@ def main(pfiledir, pfilepattern, out_file_dir):
         doy_ticks['labels']=['Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov']
         
         keyvars = ['speed','power','capacity_factor']
-        groupvars = ['year','month','season']
+        groupvars = [['year'],['month'],['season']]
 
         for gv in groupvars:
-            print(f'getting summary stats for {lease_code} by {gv}')
+            if len(gv)>1:
+                gvtitle = ', '.join(gv)
+                gvfname = '_'.join(gv)
+            else:
+                gvtitle=gv[0]
+                gvfname=gv[0]
+                gv=gv[0]
+            print(f'getting summary stats for {lease_code} by {gvtitle}')
             all_vars = keyvars.copy()
             all_vars.append(gv)
             stats = df[all_vars].groupby(gv).describe()
-            stats.to_csv(os.path.join(csv_savedir, f'{lease_code}-summary_stats_by_{gv}_{t0.strftime("%Y%m%d")}-{t1.strftime("%Y%m%d")}.csv'))
+            stats.to_csv(os.path.join(csv_savedir, f'{lease_code}-summary_stats_by_{gvfname}_{t0.strftime("%Y%m%d")}-{t1.strftime("%Y%m%d")}.csv'))
             dfgroup=df.copy()
             dfgroup['order_var'] = np.nan
             if gv in ['month','year']:
@@ -150,7 +158,7 @@ def main(pfiledir, pfilepattern, out_file_dir):
                 plt.xticks(xt,xl)
                 plt.xlabel(None)
                 plt.ylabel(unit_labels[kv])
-                plt.suptitle(f'{data["lease"]}')
+                plt.suptitle(f'{lease_name}')
                 plt.title(f'{kv} {t0.strftime("%Y-%m-%d")} to {t1.strftime("%Y-%m-%d")}')
                 plt.savefig(os.path.join(boxplot_savedir, f'{lease_code}-{kv}_by_{gv}_{t0.strftime("%Y%m%d")}-{t1.strftime("%Y%m%d")}.png'), dpi=300)
                 plt.close()
@@ -167,7 +175,7 @@ def main(pfiledir, pfilepattern, out_file_dir):
             plt.xticks(doy_ticks['doy'],doy_ticks['labels'])
             plt.xlabel(None)
             plt.ylabel(unit_labels[kv])
-            plt.suptitle(f'{data["lease"]}')
+            plt.suptitle(f'{lease_name}')
             plt.title(f'{kv} {t0.strftime("%Y-%m-%d")} to {t1.strftime("%Y-%m-%d")}')
             plt.savefig(os.path.join(heatmap_savedir, f'{lease_code}-{kv}_heatmap_{t0.strftime("%Y%m%d")}-{t1.strftime("%Y%m%d")}.png'), dpi=300)
             plt.close()
