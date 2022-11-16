@@ -34,6 +34,7 @@ def main(pfiledir, save_dir):
         with open(f, 'rb') as handle:
             data = pickle.load(handle)
 
+        timestr_range = f.split('-')[-1].split('.pickle')[0]
         lease_code = data['lease'].split(' - ')[0]
         img_savedir = os.path.join(save_dir, lease_code, 'timeseries')
         os.makedirs(img_savedir, exist_ok=True)
@@ -42,7 +43,7 @@ def main(pfiledir, save_dir):
         speed = wind_uv_to_spd(data['u'], data['v'])
         lon = np.round(np.unique(data['wrf_lon'])[0], 2)
         lat = np.round(np.unique(data['wrf_lat'])[0], 2)
-        save_file = os.path.join(img_savedir, f'{lease_code}-windspeed_ts.png')
+        save_file = os.path.join(img_savedir, f'{lease_code}-windspeed_ts_{timestr_range}.png')
 
         fig, ax = plt.subplots(figsize=(12, 7))
         ax.plot(data['time'], speed)
@@ -62,7 +63,7 @@ def main(pfiledir, save_dir):
         ax.set_ylabel('Estimated 15 MW Wind Power (kW)')
         ax.set_title(f'Est Power {data["height"]}m at center of WEA {lon, lat}\n{data["lease"]}')
 
-        save_file = os.path.join(img_savedir, f'{lease_code}-windpower_ts.png')
+        save_file = os.path.join(img_savedir, f'{lease_code}-windpower_ts_{timestr_range}.png')
         plt.savefig(save_file, dpi=300)
         plt.close()
 
@@ -73,7 +74,7 @@ def main(pfiledir, save_dir):
         ax.set_ylabel('Estimated Capacity Factor')
         ax.set_title(f'Est Capacity Factor {data["height"]}m at center of WEA {lon, lat}\n{data["lease"]}')
 
-        save_file = os.path.join(img_savedir, f'{lease_code}-capacityfactor_ts.png')
+        save_file = os.path.join(img_savedir, f'{lease_code}-capacityfactor_ts_{timestr_range}.png')
         plt.savefig(save_file, dpi=300)
         plt.close()
 
