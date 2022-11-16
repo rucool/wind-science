@@ -33,12 +33,20 @@ def main(pfiledir, pfilepattern, out_file_dir):
     files = glob.glob(os.path.join(pfiledir, pfilepattern))
     heat_cmap = mpl.colormaps['Reds']
     heat_cmap.set_under('white')
+    power_curve = os.path.join(pfiledir,'wrf_lw15mw_power.csv')
+    pc = pd.read_csv(power_curve)
+    # define units
+    unit_labels = dict(speed='m/s',power='kW',capacity_factor=' ')
+    season_order = dict(winter=1,spring=2,summer=3,fall=4)
+    all_dfs = []
+ 
     for f in files:
         print(f'reading {f}')
         with open(f, 'rb') as handle:
             data = pickle.load(handle)
 
         lease_code = data['lease'].split(' - ')[0]
+        data['lease_code'] = lease_code
 
         # calculate wind speed
         data['speed'] = wind_uv_to_spd(data['u'], data['v'])
@@ -46,14 +54,17 @@ def main(pfiledir, pfilepattern, out_file_dir):
         lat = np.round(np.unique(data['wrf_lat'])[0], 2)
 
         # calculate wind power and capacity factor
-        power_curve = os.path.join(pfiledir,'wrf_lw15mw_power.csv')
-        pc = pd.read_csv(power_curve)
         data['power'] = np.interp(data['speed'], pc['Wind Speed'], pc['Power'])
         data['capacity_factor'] = data['power'] / 15000
 
-        # define units
-        unit_labels = dict(speed='m/s',power='kW',capacity_factor=' ')
-        season_order = dict(winter=1,spring=2,summer=3,fall=4)
+        # assign to dataframe and add month and season
+        dfi = pd.DataFrame.from_dict(data)
+        all_dfs.append(dfi)
+    
+    print('concatenating data')
+    all_data = pd.concat(all_dfs)
+    for lease_code in np.unique(all_data['lease_code']):
+        print(f'starting {lease_code}')
 
         # set up save directories
         csv_savedir = os.path.join(out_file_dir, lease_code, 'csv')
@@ -63,8 +74,7 @@ def main(pfiledir, pfilepattern, out_file_dir):
         os.makedirs(boxplot_savedir, exist_ok=True)
         os.makedirs(heatmap_savedir, exist_ok=True)
 
-        # assign to dataframe and add month and season
-        df = pd.DataFrame.from_dict(data)
+        df = pd.DataFrame(all_data[all_data['lease_code']==lease_code])
         df['year'] = df['time'].dt.year
         df['month'] = df['time'].dt.month
         df['season'] = np.nan
@@ -73,6 +83,8 @@ def main(pfiledir, pfilepattern, out_file_dir):
         df.loc[np.logical_and(df['month']>=3,df['month']<=5), 'season'] = 'spring'
         df.loc[np.logical_and(df['month']>=6,df['month']<=8), 'season'] = 'summer'
         df.loc[np.logical_and(df['month']>=9,df['month']<=11), 'season'] = 'fall'
+        t0=min(df['time'])
+        t1=max(df['time'])
         df.to_csv(os.path.join(csv_savedir, f'{lease_code}-ruwrf-timeseries_{t0.strftime("%Y%m%d")}-{t1.strftime("%Y%m%d")}.csv'))
         
         # reformat to add day of year, change to december-november year
@@ -86,9 +98,7 @@ def main(pfiledir, pfilepattern, out_file_dir):
         doy_ticks['doy'] = doy_ticks['time'].dt.dayofyear
         doy_ticks.loc[doy_ticks['month']==12, 'doy'] -= 365
         doy_ticks['labels']=['Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov']
-        t0=min(df['time'])
-        t1=max(df['time'])
-
+        
         keyvars = ['speed','power','capacity_factor']
         groupvars = ['year','month','season']
 
@@ -97,7 +107,7 @@ def main(pfiledir, pfilepattern, out_file_dir):
             all_vars = keyvars.copy()
             all_vars.append(gv)
             stats = df[all_vars].groupby(gv).describe()
-            stats.to_csv(os.path.join(csv_savedir, f'{lease_code}-summary_stats_by_{gv}.csv'))
+            stats.to_csv(os.path.join(csv_savedir, f'{lease_code}-summary_stats_by_{gv}_{t0.strftime("%Y%m%d")}-{t1.strftime("%Y%m%d")}.csv'))
             dfgroup=df.copy()
             dfgroup['order_var'] = np.nan
             if gv in ['month','year']:
@@ -147,9 +157,9 @@ def main(pfiledir, pfilepattern, out_file_dir):
         
         for kv in keyvars:
             if kv=='speed':
-                vm = 15
+                vm = len(df)/500
             else:
-                vm=8
+                vm=len(df)/1000
             print(f'plotting {kv} heatmap for {lease_code}')
             fig, ax = plt.subplots(figsize=(12,7))
             plt.hexbin(dfgroup['doy'], dfgroup[kv], cmap=heat_cmap, 
@@ -166,5 +176,5 @@ def main(pfiledir, pfilepattern, out_file_dir):
 if __name__ == '__main__':
     pckl_file_dir = '/Users/nazzaro/Documents/GitHub/wind-science/capacity_factor_analysis/files'
     pckl_file_pattern = '*.pickle'
-    out_file_dir = '/Users/nazzaro/Desktop/wind_capacity'
+    out_file_dir = '/Users/nazzaro/Desktop/wind_capacity/v2'
     main(pckl_file_dir, pckl_file_pattern, out_file_dir)
