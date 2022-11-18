@@ -8,8 +8,8 @@ Calculate wind shear and alpha based on difference between two heights.
 
 # https://www.engineeringtoolbox.com/wind-shear-d_1215.html
 
-import argparse
-import sys
+#import argparse
+#import sys
 import numpy as np
 from netCDF4 import Dataset, num2date
 import xarray as xr
@@ -118,37 +118,49 @@ def read_wrf(m,t0,t1,lon,lat,h0,h1,fullrange):
     wrf.close()
     return time, z, lon, lat, u, v
 
-def main(args):
-    source = args.data_source
-    t1 = args.end_time
+def main(data_source='wrf3km', start_time=0, end_time='latest', 
+        lower_layer=40, upper_layer=260, longitude=-74.08194, latitude=39.2025, 
+        calc_shear=True, use_direction=False, calc_alpha=False, shear_layers='topbottom'):
+    source = data_source # options: wrf3km or wrf9km
+    t1 = end_time # yyyymmddTHHMM or latest
+    t0 = start_time # yyyymmddTHHMM or number of hours to go backwards from t1
+    h0 = lower_layer # lower height to use in calculation
+    h1 = upper_layer # upper height to use in calculation
+    lon = longitude # single lon, or east and west bounds
+    lat = latitude # single lat, or south and north bounds
+    calc_shear = calc_shear # whether to calculate shear
+    use_direction = use_direction # whether to account for direction changes in shear calculation
+    calc_alpha = calc_alpha # whether to calculate alpha
+    layer_method = shear_layers # how to account for multiple layers between top and bottom; options:
+                        # topbottom = ignore layers in between
+                        # maxdiff = use dz between top and bottom and 
+                        #           du between max and min speed over entire height range
+                        # iterative = calculate shear and/or alpha between consecutive layers
+
     if t1 == 'latest':
         t1=pd.Timestamp.now()
     else:
         t1=pd.to_datetime(t1)
-    t0=args.start_time
-    if t0.isnumeric() and int(t0)<93*24:
+    if str(t0).isnumeric() and int(t0)<93*24:
         t0=t1-timedelta(hours=t0)
     elif t0.isnumeric() and int(t0)<10000000:
         print('Please provide starting date less than 93 days before t1, or format yyyymmddTHHMM')
         return
     else:
         t0=pd.to_datetime(t0)
-    h0=args.lower_layer
-    h1=args.upper_layer
-    if args.western_longitude:
-        if not args.eastern_longitude or not args.southern_latitude or not args.northern_latitude:
-            print('Please provide entire bounding box')
-            return
-        lon = [args.western_longitude, args.eastern_longitude]
-        lat = [args.southern_latitude, args.northern_latitude]
-    else:
-        lon = args.longitude
-        lat = args.latitude
-    calc_shear = args.shear
-    use_direction = args.direction
-    calc_alpha = args. alpha
-    layer_method = args.shear_layers
 
+    if isinstance(lon, list) and isinstance(lat, list):
+        if len(lon)>2 or len(lat)>2 or len(lon)==0 or len(lat)==0 or len(lon)!=len(lat):
+            print('longitude and latitude must provide either single point or boundaries of box')
+            return
+        if len(lon)==2 and lon[1]<lon[0]:
+            lon.reverse()
+        if len(lat)==2 and lat[1]<lat[0]:
+            lat.reverse()
+    elif not (isinstance(lon, (float,int)) and isinstance(lat, (float,int))):
+        print('longitude and latitude must provide either single point or boundaries of box')
+        return
+    
     if layer_method=='maxdiff':
         if use_direction:
             print('Capability not yet set up to account for direction in shear calculation for maximum difference option. Ignoring direction.')
@@ -182,30 +194,30 @@ def main(args):
                 shear = np.nan*np.ones(np.shape(speed))
                 if use_direction:
                     direction_shear = np.nan*np.ones(np.shape(speed))
-                    ss, sd = calculate_directional_shear(z[i],u[:,i,:,:],v[:,i,:,:],z[i+1],u[:,i+1,:,:],v[:,i+1,:,:])
+                    ss, sd = calculate_directional_shear(z[i].data,u[:,i,:,:],v[:,i,:,:],z[i+1].data,u[:,i+1,:,:],v[:,i+1,:,:])
                     shear[:,i,:,:] = ss
                     direction_shear[:,i,:,:] = sd
                 else:
-                    ss = calculate_speed_shear(z[i],speed[:,i,:,:],z[i+1],speed[:,i+1,:,:])
+                    ss = calculate_speed_shear(z[i].data,speed[:,i,:,:],z[i+1].data,speed[:,i+1,:,:])
                     shear[:,i,:,:] = ss
             if calc_alpha:
                 alpha = np.nan*np.ones(np.shape(speed))
-                a = calculate_alpha(z[i],speed[:,i,:,:],z[i+1],speed[:,i+1,:,:])
+                a = calculate_alpha(z[i].data,speed[:,i,:,:],z[i+1].data,speed[:,i+1,:,:])
                 alpha[:,i,:,:] = a
     else:
         if calc_shear:
             if use_direction:
-                shear, direction_shear = calculate_directional_shear(z[0],u[:,0,:,:],v[:,0,:,:],z[-1],u[:,-1,:,:],v[:,-1,:,:])
+                shear, direction_shear = calculate_directional_shear(z[0].data,u[:,0,:,:],v[:,0,:,:],z[-1].data,u[:,-1,:,:],v[:,-1,:,:])
             else:
-                shear = calculate_speed_shear(z[0],s1,z[-1],s2)
+                shear = calculate_speed_shear(z[0].data,s1,z[-1].data,s2)
         if calc_alpha:
-            alpha = calculate_alpha(z[0],s1,z[-1],s2)
+            alpha = calculate_alpha(z[0].data,s1,z[-1].data,s2)
     
     return time, z, lon, lat, shear, direction_shear, alpha
 
     
 
-if __name__ == '__main__':
+""" if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser(description=main.__doc__,
                                          formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
@@ -275,4 +287,4 @@ if __name__ == '__main__':
 
     parsed_args = arg_parser.parse_args()
 
-    sys.exit(main(parsed_args))
+    sys.exit(main(parsed_args)) """
