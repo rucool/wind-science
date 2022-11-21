@@ -45,7 +45,7 @@ def main(pfiledir, pfilepattern, out_file_dir):
         with open(f, 'rb') as handle:
             data = pickle.load(handle)
 
-        lease_code = data['lease'].split(' - ')[0]
+        lease_code = data['lease'].split(' - ')[0].replace(' ', '')
         data['lease_code'] = lease_code
 
         # calculate wind speed

@@ -35,7 +35,7 @@ def main(pfiledir, save_dir):
             data = pickle.load(handle)
 
         timestr_range = f.split('-')[-1].split('.pickle')[0]
-        lease_code = data['lease'].split(' - ')[0]
+        lease_code = data['lease'].split(' - ')[0].replace(' ', '')
         img_savedir = os.path.join(save_dir, lease_code, 'timeseries')
         os.makedirs(img_savedir, exist_ok=True)
 
