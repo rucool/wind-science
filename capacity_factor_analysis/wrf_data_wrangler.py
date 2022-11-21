@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 11/10/2022
-Last modified: Lori Garzio 11/10/2022
+Last modified: Lori Garzio 11/21/2022
 Grab RU-WRF u, v data from thredds for a user-defined time-range and height at specified locations
 """
 
@@ -68,7 +68,7 @@ def main(start_str, end_str, height, save_dir):
             data['code'] = row.code
             data['state'] = row.state
             data['lease'] = row.lease
-            lease_code = row.lease.split(' - ')[0]
+            lease_code = row.lease.split(' - ')[0].replace(' ', '')
 
             midlon = row['long']
             midlat = row['lat']
