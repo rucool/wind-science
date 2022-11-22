@@ -1,30 +1,30 @@
-long,lat,company,state,lease,code
--74.7013156,38.67447729,"GSOE I, LLC",Delaware,OCS-A 0482 - GSOE I  LLC,
--75.34906369,36.90796819,Virginia Electric and Power Company,Virginia,OCS-A 0483 - Virginia Electric and Power Company,
--71.08047823,41.1539281,"Revolution Wind, LLC",Rhode Island / Massachusetts,"OCS-A 0486 - Revolution Wind, LLC",
--71.04516262,40.98528324,"Sunrise Wind, LLC",Rhode Island / Massachusetts,OCS-A 0487 - Sunrise Wind LLC,
--74.76059658,38.34677247,US Wind Inc.,Maryland,OCS-A 0490 - US Wind Inc.,
--75.53474047,36.89132002,"Commonwealth of Virginia, Department of Mines, Minerals and Energy",Virginia,"OCS-A 0497 - Commonwealth of VA, Dept. of Mines, Minerals and Energy",
--74.24223026,39.12230094,Ocean Wind LLC,New Jersey,OCS-A 0498 - Ocean Wind LLC,ocean_wind
--70.79216683,40.96884655,Bay State Wind LLC,Massachusetts,OCS-A 0500 - Bay State Wind LLC,
--70.48189802,41.04322459,Vineyard Wind 1 LLC,Massachussets,OCS-A 0501 - Vineyard Wind LLC,
--71.43643245,41.26789128,The Narragansett Electric Company,Rhode Island,OCS-A 0506 - The Narragansett Electric Company,
--75.12710449,36.33896526,"Avangrid Renewables, LLC",North Carolina,OCS-A 0508 - Avangrid Renewables LLC,
--73.31481426,40.29534089,"Empire Offshore Wind , LLC",New York,"OCS-A 0512  -  Empire Offshore Wind, LLC",
--71.13334029,41.08881779,"South Fork Wind, LLC",Rhode Island / Massachusetts,"OCS-A 0517 - South Fork Wind, LLC",
--74.66496134,38.56547769,"Skipjack Offshore Energy, LLC",Delaware,OCS-A 0519 - Skipjack Offshore Energy LLC,
--70.5233077,40.82398893,Beacon Wind LLC,Massachusetts,OCS-A 0520 - Beacon Wind LLC,
--70.41615753,40.74719053,"Mayflower Wind Energy, LLC",Massachusetts,OCS-A 0521 - Mayflower Wind Energy LLC,
--70.22821327,40.68200039,Vineyard Northeast LLC,Massachusetts,OCS-A 0522 - Vineyard Northeast LLC,
--74.37892926,39.065615,Orsted North America Inc.,New Jersey,OCS-A 0532 - Orsted North America Inc.,orsted
--70.65833961,40.89549055,Park City Wind LLC,Massachussets,OCS-A 0534 - Park City Wind LLC,
--74.09254511,39.27298755,"Atlantic Shores Offshore Wind Projects 1 & 2, LLC's",New Jersey,"OCS-A 0499 - Atlantic Shores Offshore Wind Projects 1 & 2, LLC's",atlantic_shores_0499
--74.00408437,39.47223048,"Atlantic Shores Offshore Wind, LLC",New Jersey,"OCS-A 0549 - Atlantic Shores Offshore Wind, LLC",atlantic_shores_0549
--73.17023909,39.71846113,Attentive Energy LLC,NY/NJ,OCS-A 0538 - Attentive Energy LLC,attentive_energy
--73.30406106,39.54142013,"Community Offshore Wind, LLC",NY/NJ,"OCS-A 0539 - Community Offshore Wind, LLC",community_offshore_wind
--73.57849887,39.36099059,"Atlantic Shores Offshore Wind Bight, LLC",NY/NJ,"OCS-A 0541 - Atlantic Shores Offshore Wind Bight, LLC",atlantic_shores_offshore
--73.46109255,39.30381557,Invenergy Wind Offshore LLC,NY/NJ,OCS-A 0542 - Invenergy Wind Offshore LLC,invenergy_wind_offshore
--73.07928612,40.2415736,Mid-Atlantic Offshore Wind LLC,NY/NJ,OCS-A 0544 - Mid-Atlantic Offshore Wind LLC,mid-atlantic_offshore_wind
--72.74029799,39.97566861,"OW Ocean Winds East, LLC",NY/NJ,"OCS-A 0537 - OW Ocean Winds East, LLC",ocean_winds_east
--77.83018625,33.44714977,"Duke Energy Renewables Wind, LLC",North Carolina,"OCS-A 0546 - Duke Energy Renewables Wind, LLC",
--77.97947477,33.45103126,"TotalEnergies Renewables USA, LLC",North Carolina,"OCS-A 0545 - TotalEnergies Renewables USA, LLC",
+long,lat,company,state,lease
+-74.7013156,38.67447729,"GSOE I, LLC",Delaware,OCS-A 0482 - GSOE I  LLC
+-75.34906369,36.90796819,Virginia Electric and Power Company,Virginia,OCS-A 0483 - Virginia Electric and Power Company
+-71.08047823,41.1539281,"Revolution Wind, LLC",Rhode Island / Massachusetts,"OCS-A 0486 - Revolution Wind, LLC"
+-71.04516262,40.98528324,"Sunrise Wind, LLC",Rhode Island / Massachusetts,OCS-A 0487 - Sunrise Wind LLC
+-74.76059658,38.34677247,US Wind Inc.,Maryland,OCS-A 0490 - US Wind Inc.
+-75.53474047,36.89132002,"Commonwealth of Virginia, Department of Mines, Minerals and Energy",Virginia,"OCS-A 0497 - Commonwealth of VA, Dept. of Mines, Minerals and Energy"
+-74.24223026,39.12230094,Ocean Wind LLC,New Jersey,OCS-A 0498 - Ocean Wind LLC
+-70.79216683,40.96884655,Bay State Wind LLC,Massachusetts,OCS-A 0500 - Bay State Wind LLC
+-70.48189802,41.04322459,Vineyard Wind 1 LLC,Massachussets,OCS-A 0501 - Vineyard Wind LLC
+-71.43643245,41.26789128,The Narragansett Electric Company,Rhode Island,OCS-A 0506 - The Narragansett Electric Company
+-75.12710449,36.33896526,"Avangrid Renewables, LLC",North Carolina,OCS-A 0508 - Avangrid Renewables LLC
+-73.31481426,40.29534089,"Empire Offshore Wind , LLC",New York,"OCS-A 0512  -  Empire Offshore Wind, LLC"
+-71.13334029,41.08881779,"South Fork Wind, LLC",Rhode Island / Massachusetts,"OCS-A 0517 - South Fork Wind, LLC"
+-74.66496134,38.56547769,"Skipjack Offshore Energy, LLC",Delaware,OCS-A 0519 - Skipjack Offshore Energy LLC
+-70.5233077,40.82398893,Beacon Wind LLC,Massachusetts,OCS-A 0520 - Beacon Wind LLC
+-70.41615753,40.74719053,"Mayflower Wind Energy, LLC",Massachusetts,OCS-A 0521 - Mayflower Wind Energy LLC
+-70.22821327,40.68200039,Vineyard Northeast LLC,Massachusetts,OCS-A 0522 - Vineyard Northeast LLC
+-74.37892926,39.065615,Orsted North America Inc.,New Jersey,OCS-A 0532 - Orsted North America Inc.
+-70.65833961,40.89549055,Park City Wind LLC,Massachussets,OCS-A 0534 - Park City Wind LLC
+-74.09254511,39.27298755,"Atlantic Shores Offshore Wind Projects 1 & 2, LLC's",New Jersey,"OCS-A 0499 - Atlantic Shores Offshore Wind Projects 1 & 2, LLC's"
+-74.00408437,39.47223048,"Atlantic Shores Offshore Wind, LLC",New Jersey,"OCS-A 0549 - Atlantic Shores Offshore Wind, LLC"
+-73.17023909,39.71846113,Attentive Energy LLC,NY/NJ,OCS-A 0538 - Attentive Energy LLC
+-73.30406106,39.54142013,"Community Offshore Wind, LLC",NY/NJ,"OCS-A 0539 - Community Offshore Wind, LLC"
+-73.57849887,39.36099059,"Atlantic Shores Offshore Wind Bight, LLC",NY/NJ,"OCS-A 0541 - Atlantic Shores Offshore Wind Bight, LLC"
+-73.46109255,39.30381557,Invenergy Wind Offshore LLC,NY/NJ,OCS-A 0542 - Invenergy Wind Offshore LLC
+-73.07928612,40.2415736,Mid-Atlantic Offshore Wind LLC,NY/NJ,OCS-A 0544 - Mid-Atlantic Offshore Wind LLC
+-72.74029799,39.97566861,"OW Ocean Winds East, LLC",NY/NJ,"OCS-A 0537 - OW Ocean Winds East, LLC"
+-77.83018625,33.44714977,"Duke Energy Renewables Wind, LLC",North Carolina,"OCS-A 0546 - Duke Energy Renewables Wind, LLC"
+-77.97947477,33.45103126,"TotalEnergies Renewables USA, LLC",North Carolina,"OCS-A 0545 - TotalEnergies Renewables USA, LLC"
