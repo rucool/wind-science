@@ -53,6 +53,15 @@ def main(start_str, end_str, height, lease, state, save_dir):
         df = loc_df[loc_df['state'] == state]
 
     for midlon, midlat, co, st, ll, lease_code in zip(df['long'], df['lat'], df['company'], df['state'], df['lease'], df['lease_code']):
+        # check if a NetCDF file already exists for the lease/height
+        save_file = os.path.join(save_dir, f'{lease_code}_{height}.nc')
+        if os.path.isfile(save_file):
+            print(f'Subset file for this lease area and height already exists: {save_file}')
+            print('Please use the wrf_data_updater.py code to add more data to the existing file')
+            continue
+
+        print(f'Downloading data for {lease_code} {height}m')
+
         # find the closest WRF coordinate
         d = haversine_dist(midlon, midlat, wrf_lon, wrf_lat)
         dmin = np.argwhere(d.data == np.min(d.data))
@@ -111,7 +120,6 @@ def main(start_str, end_str, height, lease, state, save_dir):
         }
 
         for tm in ds_filter.time.values:
-            print(tm)
             data['coords']['time']['data'] = np.append(data['coords']['time']['data'], tm)
             data['data_vars']['U']['data'] = np.append(data['data_vars']['U']['data'], ds_filter.sel(time=tm)['U'].values)
             data['data_vars']['V']['data'] = np.append(data['data_vars']['V']['data'], ds_filter.sel(time=tm)['V'].values)
@@ -145,9 +153,8 @@ def main(start_str, end_str, height, lease, state, save_dir):
                                 _FillValue=False, dtype=np.double)
 
         # save .nc file
-        save_file = os.path.join(save_dir, f'{lease_code}_{height}.nc')
         outds.to_netcdf(save_file, encoding=encoding, format='netCDF4', engine='netcdf4', unlimited_dims='time')
-        print(f'Finished downloading {lease_code}\n')
+        print(f'Finished downloading {lease_code} {height}m')
 
 
 if __name__ == '__main__':
