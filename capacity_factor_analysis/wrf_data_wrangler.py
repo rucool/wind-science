@@ -127,7 +127,7 @@ def main(start_str, end_str, height, lease, state, save_dir):
         outds = xr.Dataset.from_dict(data)
 
         # add created time to global attrs
-        datetime_format = '%Y%m%dT%H%M%SZ'
+        datetime_format = '%Y-%m-%dT%H:%M:%SZ'
         created = dt.datetime.utcnow().strftime(datetime_format)  # creation time Timestamp
         time_start = pd.to_datetime(outds.time.values[0]).strftime(datetime_format)
         time_end = pd.to_datetime(outds.time.values[-1]).strftime(datetime_format)
