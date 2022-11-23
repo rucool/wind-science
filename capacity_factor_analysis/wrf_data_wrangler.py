@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 11/10/2022
-Last modified: Lori Garzio 11/22/2022
+Last modified: Lori Garzio 11/23/2022
 Grab RU-WRF U, V data from THREDDS for a user-defined time-range and height at specified locations and export as NetCDF
 """
 
@@ -134,6 +134,7 @@ def main(start_str, end_str, height, lease, state, save_dir):
 
         global_attributes = OrderedDict([
             ('date_created', created),
+            ('date_modified', created),
             ('time_coverage_start', time_start),
             ('time_coverage_end', time_end),
             ('comment', 'U and V subset from RU-WRF dataset at the specified location and height'),
