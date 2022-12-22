@@ -183,8 +183,8 @@ def main(args):
         # save .nc file
         outds.to_netcdf(save_file, encoding=encoding, format='netCDF4', engine='netcdf4', unlimited_dims='time')
         logging.info(f'Finished downloading {lease_code} {height}m: {start_str} to {end_str}')
-        overall_start = pd.to_datetime(np.nanmin(outds.time.values)).strftime('%Y%m%d')
-        overall_end = pd.to_datetime(np.nanmax(outds.time.values)).strftime('%Y%m%d')
+        overall_start = pd.to_datetime(np.nanmin(outds.time.values)).strftime('%Y-%m-%dT%H:%M')
+        overall_end = pd.to_datetime(np.nanmax(outds.time.values)).strftime('%Y-%m-%dT%H:%M')
         logging.info(f'Data range available in {save_file}: {overall_start} to {overall_end}')
 
 
