@@ -2,16 +2,21 @@
 
 """
 Author: Lori Garzio on 11/10/2022
-Last modified: Lori Garzio 11/23/2022
-Grab RU-WRF U, V data from THREDDS for a user-defined time-range and height at specified locations and export as NetCDF
+Last modified: Lori Garzio 12/22/2022
+Grab RU-WRF U, V data from THREDDS for a user-defined time-range and height at specified locations and export as NetCDF.
+If lease and state options for filtering datasets are both None, this will process all lease areas in
+./files/lease_centroids.csv
 """
 
+import argparse
+import sys
 import os
 import numpy as np
 import xarray as xr
 import pandas as pd
 import datetime as dt
 from collections import OrderedDict
+from functions.common import setup_logger
 pd.set_option('display.width', 320, "display.max_columns", 15)  # for display in pycharm console
 
 
@@ -34,7 +39,15 @@ def haversine_dist(blon,blat,slon,slat):
     return distance
 
 
-def main(start_str, end_str, height, lease, state, save_dir):
+def main(args):
+    start_str = args.start
+    end_str = args.end
+    height = args.height
+    lease = args.lease
+    state = args.state
+    save_dir = args.save_dir
+    loglevel = args.loglevel.upper()
+
     start_date = dt.datetime.strptime(start_str, '%Y%m%d')
     end_date = dt.datetime.strptime(end_str, '%Y%m%d') + dt.timedelta(hours=23)
 
@@ -47,20 +60,34 @@ def main(start_str, end_str, height, lease, state, save_dir):
     location_csv = '/Users/garzio/Documents/repo/rucool/wind-science/capacity_factor_analysis/files/lease_centroids.csv'
     loc_df = pd.read_csv(location_csv)
     loc_df['lease_code'] = loc_df['lease'].map(lambda x: x.split(' - ')[0].replace(' ', ''))
-    if lease:
+    if np.logical_and(isinstance(lease, str), isinstance(state, str)):
+        raise ValueError('Please provide only a valid lease OR state.')
+    elif np.logical_and(not lease, not state):
+        df = loc_df
+    elif lease:
         df = loc_df[loc_df['lease_code'] == lease]
+        if len(df) == 0:
+            raise ValueError('Please provide a valid lease code, found in ./files/lease_centroids.csv (i.e. "OCS-A0512")')
     elif state:
         df = loc_df[loc_df['state'] == state]
+        if len(df) == 0:
+            raise ValueError('Please provide a valid state, found in ./files/lease_centroids.csv (i.e. "New Jersey")')
 
     for midlon, midlat, co, st, ll, lease_code in zip(df['long'], df['lat'], df['company'], df['state'], df['lease'], df['lease_code']):
+        # set up log file
+        logfile = os.path.join(save_dir, 'logs', f'{lease_code}_{height}.log')
+        logging = setup_logger(f'logging_{lease_code}', loglevel, logfile)
+
+        logging.info(f'Attempting to download U and V for state: {st}; company: {co}; lease {lease_code} at height {height}m')
+
         # check if a NetCDF file already exists for the lease/height
         save_file = os.path.join(save_dir, f'{lease_code}_{height}.nc')
         if os.path.isfile(save_file):
-            print(f'Subset file for this lease area and height already exists: {save_file}')
-            print('Please use the wrf_data_updater.py code to add more data to the existing file')
+            logging.warning(f'Subset file for {lease_code} and height {height}m already exists: {save_file}')
+            logging.warning('Please use the wrf_data_updater.py code to add more data to the existing file')
             continue
 
-        print(f'Downloading data for {lease_code} {height}m')
+        logging.info(f'Downloading data for {lease_code} {height}m: {start_str} to {end_str}')
 
         # find the closest WRF coordinate
         d = haversine_dist(midlon, midlat, wrf_lon, wrf_lat)
@@ -155,14 +182,53 @@ def main(start_str, end_str, height, lease, state, save_dir):
 
         # save .nc file
         outds.to_netcdf(save_file, encoding=encoding, format='netCDF4', engine='netcdf4', unlimited_dims='time')
-        print(f'Finished downloading {lease_code} {height}m')
+        logging.info(f'Finished downloading {lease_code} {height}m: {start_str} to {end_str}')
+        overall_start = pd.to_datetime(np.nanmin(outds.time.values)).strftime('%Y%m%d')
+        overall_end = pd.to_datetime(np.nanmax(outds.time.values)).strftime('%Y%m%d')
+        logging.info(f'Data range available in {save_file}: {overall_start} to {overall_end}')
 
 
 if __name__ == '__main__':
-    start = '20190101'
-    end = '20190101'
-    height = 160
-    lease = None  # 'OCS-A0498'
-    state = 'New Jersey'  # 'New Jersey', 'NY/NJ'
-    sDir = '/Users/garzio/Documents/repo/rucool/wind-science/capacity_factor_analysis/files'
-    main(start, end, height, lease, state, sDir)
+    arg_parser = argparse.ArgumentParser(description=main.__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+    arg_parser.add_argument('-s', '--start',
+                            dest='start',
+                            default='20190101',
+                            type=str,
+                            help='Start Date in format YYYYMMDD ')
+
+    arg_parser.add_argument('-e', '--end',
+                            dest='end',
+                            default='20221031',
+                            type=str,
+                            help='End Date in format YYYYMMDD')
+
+    arg_parser.add_argument('-z', '--height',
+                            dest='height',
+                            default=160,
+                            type=list,
+                            help='Height in meters')
+
+    arg_parser.add_argument('-l', '--lease',
+                            dest='lease',
+                            default=None,  # 'OCS-A0512'
+                            help='Optional filter on lease area, valid OCS lease codes can be found in ./files/lease_centroids.csv. Example: "OCS-A0512". If this is defined, -state must be None')
+
+    arg_parser.add_argument('-state',
+                            dest='state',
+                            default=None,  # 'New Jersey'
+                            help='Optional filter on state, valid options for state can be found in ./files/lease_centroids.csv. Example: "New Jersey". If this is defined, -lease must be None')
+
+    arg_parser.add_argument('-save_dir',
+                            default='/home/coolgroup/bpu/wrf/data/wrf_nc/wea_centroids',
+                            type=str,
+                            help='Full directory path to save output files.')
+
+    arg_parser.add_argument('-loglevel',
+                            help='Verbosity level',
+                            type=str,
+                            choices=['debug', 'info', 'warning', 'error', 'critical'],
+                            default='info')
+
+    parsed_args = arg_parser.parse_args()
+    sys.exit(main(parsed_args))
