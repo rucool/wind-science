@@ -57,7 +57,7 @@ def main(args):
     wrf_lat = ds['XLAT']
     wrf_lon = ds['XLONG']
 
-    location_csv = '/Users/garzio/Documents/repo/rucool/wind-science/capacity_factor_analysis/files/lease_centroids.csv'
+    location_csv = '/home/wrfadmin/toolboxes/wind-science/capacity_factor_analysis/files/lease_centroids.csv'
     loc_df = pd.read_csv(location_csv)
     loc_df['lease_code'] = loc_df['lease'].map(lambda x: x.split(' - ')[0].replace(' ', ''))
     if np.logical_and(isinstance(lease, str), isinstance(state, str)):
@@ -212,12 +212,16 @@ if __name__ == '__main__':
     arg_parser.add_argument('-l', '--lease',
                             dest='lease',
                             default=None,  # 'OCS-A0512'
-                            help='Optional filter on lease area, valid OCS lease codes can be found in ./files/lease_centroids.csv. Example: "OCS-A0512". If this is defined, -state must be None')
+                            help='Optional filter on lease area, valid OCS lease codes can be found in '
+                                 './files/lease_centroids.csv. Example: "OCS-A0512". If this is defined, '
+                                 '-state must be None')
 
     arg_parser.add_argument('-state',
                             dest='state',
                             default=None,  # 'New Jersey'
-                            help='Optional filter on state, valid options for state can be found in ./files/lease_centroids.csv. Example: "New Jersey". If this is defined, -lease must be None')
+                            help='Optional filter on state, valid options for state can be found in '
+                                 './files/lease_centroids.csv. Example: "New Jersey". If this is defined, '
+                                 '-lease must be None')
 
     arg_parser.add_argument('-save_dir',
                             default='/home/coolgroup/bpu/wrf/data/wrf_nc/wea_centroids',
