@@ -3,6 +3,7 @@
 """
 Author: Lori Garzio on 11/12/2022
 Last modified: 11/12/2022
+Generate a map of the lease areas and their centers
 """
 
 import pandas as pd
@@ -27,7 +28,7 @@ def main(save_file, extent):
     # kwargs['edgecolor'] = 'lightgray'
     # hp.map_add_boem_outlines(ax, plan, **kwargs)
 
-    lease_cent_csv = '/Users/garzio/Documents/repo/rucool/wind-science/capacity_factor_analysis/files/lease_centroids.csv'
+    lease_cent_csv = '/Users/garzio/Documents/repo/rucool/wind-science/files/lease_centroids.csv'
     loc_df = pd.read_csv(lease_cent_csv)
     for i, row in loc_df.iterrows():
         if row.state == 'New Jersey':

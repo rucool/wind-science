@@ -1,0 +1,4 @@
+latitude,longitude,name,long_name,wind_height,start_date,end_date,status,text_offset,text_offset_zoom
+38.46,-74.692,NDBC44009,NDBC 44009,,,,current,"[.04, -0.02]","[.04, -0.02]"
+40.369,-73.703,NDBC44065,NDBC 44065,,,,current,"[.02, .02]","[.02, .02]"
+40.251,-73.164, NDBC44025,NDBC 44025,,,,current,"[.04, -0.02]","[.04, -0.02]"

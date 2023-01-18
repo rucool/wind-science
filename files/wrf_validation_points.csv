@@ -1,0 +1,8 @@
+latitude,longitude,name,long_name,wind_height,start_date,end_date,status,text_offset,text_offset_zoom
+39.9686,-72.7173,NYNE05,NYSERDA North Buoy,,20190812,20210919,deprecated,"[.02, .02]","[.02, .02]"
+39.5465,-73.4295,NYSE06,NYSERDA South Buoy,,20190904,20220327,deprecated,"[.02, .02]","[.02, .02]"
+39.2717,-73.8892,ASOSB6,Atlantic Shores Buoy 6,,20200226,20210514,deprecated,"[.02, .02]","[.02, .02]"
+39.2025,-74.08194,ASOSB4,Atlantic Shores Buoy 4,,20210514,20220308,current,"[.045, -.015]","[.03, -.015]"
+39.817005,-74.213356,RUOYC,Oyster Creek,10,,,deprecated,"[-.25, .02]","[-.18, .02]"
+39.521396,-74.319087,RUMFS,RUMFUS SODAR,,20150513,,current,"[-.255, .045]","[-.2, .045]"
+39.4847,-73.5901,NYSWE05,NYSERDA South West Buoy,,20220129,,current,"[-.2, .03]","[-.22, .025]"
