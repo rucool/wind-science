@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 11/10/2022
-Last modified: Lori Garzio 12/22/2022
+Last modified: Lori Garzio 1/19/2023
 Grab RU-WRF U, V data from THREDDS for a user-defined time-range and height at specified locations and export as NetCDF.
 If lease and state options for filtering datasets are both None, this will process all lease areas in
 ./files/lease_centroids.csv
@@ -45,19 +45,33 @@ def main(args):
     height = args.height
     lease = args.lease
     state = args.state
+    domain = args.domain
     save_dir = args.save_dir
     loglevel = args.loglevel.upper()
 
     start_date = dt.datetime.strptime(start_str, '%Y%m%d')
     end_date = dt.datetime.strptime(end_str, '%Y%m%d') + dt.timedelta(hours=23)
 
-    mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
+    if domain == '3km':
+        mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
+        turbs_on_off = 'off'
+    elif domain == '1km_wf2km':
+        mlink = 'new_link'
+        turbs_on_off = 'on'
+    else:
+        raise ValueError('Invalid domain specified')
+
+    save_dir = os.path.join(save_dir, domain)
+    os.makedirs(save_dir, exist_ok=True)
+    save_dir_logs = os.path.join(save_dir, 'logs')
+    os.makedirs(save_dir_logs, exist_ok=True)
+
     ds = xr.open_dataset(mlink)
     ds = ds.sel(time=slice(start_date, end_date))
     wrf_lat = ds['XLAT']
     wrf_lon = ds['XLONG']
 
-    location_csv = '/home/wrfadmin/toolboxes/wind-science/capacity_factor_analysis/files/lease_centroids.csv'
+    location_csv = '/home/wrfadmin/toolboxes/wind-science/files/lease_centroids.csv'
     loc_df = pd.read_csv(location_csv)
     loc_df['lease_code'] = loc_df['lease'].map(lambda x: x.split(' - ')[0].replace(' ', ''))
     if np.logical_and(isinstance(lease, str), isinstance(state, str)):
@@ -75,19 +89,19 @@ def main(args):
 
     for midlon, midlat, co, st, ll, lease_code in zip(df['long'], df['lat'], df['company'], df['state'], df['lease'], df['lease_code']):
         # set up log file
-        logfile = os.path.join(save_dir, 'logs', f'{lease_code}_{height}.log')
+        logfile = os.path.join(save_dir_logs, f'{lease_code}_{height}_{domain}.log')
         logging = setup_logger(f'logging_{lease_code}', loglevel, logfile)
 
         logging.info(f'Attempting to download U and V for state: {st}; company: {co}; lease {lease_code} at height {height}m')
 
         # check if a NetCDF file already exists for the lease/height
-        save_file = os.path.join(save_dir, f'{lease_code}_{height}.nc')
+        save_file = os.path.join(save_dir, f'{lease_code}_{height}_{domain}.nc')
         if os.path.isfile(save_file):
             logging.warning(f'Subset file for {lease_code} and height {height}m already exists: {save_file}')
             logging.warning('Please use the wrf_data_updater.py code to add more data to the existing file')
             continue
 
-        logging.info(f'Downloading data for {lease_code} {height}m: {start_str} to {end_str}')
+        logging.info(f'Downloading windspeed data for {lease_code} {height}m: {start_str} to {end_str}')
 
         # find the closest WRF coordinate
         d = haversine_dist(midlon, midlat, wrf_lon, wrf_lat)
@@ -115,7 +129,9 @@ def main(args):
                 "company": co,
                 "state": st,
                 "lease": ll,
-                "lease_code": lease_code
+                "lease_code": lease_code,
+                "model_domain": domain,
+                "wind_turbines": turbs_on_off
             },
             "dims": "time",
             "data_vars": {
@@ -165,7 +181,8 @@ def main(args):
             ('time_coverage_start', time_start),
             ('time_coverage_end', time_end),
             ('comment', 'U and V subset from RU-WRF dataset at the specified location and height'),
-            ('data_source', mlink)
+            ('data_source', mlink),
+            ('model_version', 'v4.1')
         ])
 
         global_attributes.update(outds.attrs)
@@ -182,7 +199,7 @@ def main(args):
 
         # save .nc file
         outds.to_netcdf(save_file, encoding=encoding, format='netCDF4', engine='netcdf4', unlimited_dims='time')
-        logging.info(f'Finished downloading {lease_code} {height}m: {start_str} to {end_str}')
+        logging.info(f'Finished downloading windspeed data for {lease_code} {height}m {domain}: {start_str} to {end_str}')
         overall_start = pd.to_datetime(np.nanmin(outds.time.values)).strftime('%Y-%m-%dT%H:%M')
         overall_end = pd.to_datetime(np.nanmax(outds.time.values)).strftime('%Y-%m-%dT%H:%M')
         logging.info(f'Data range available in {save_file}: {overall_start} to {overall_end}')
@@ -222,6 +239,13 @@ if __name__ == '__main__':
                             help='Optional filter on state, valid options for state can be found in '
                                  './files/lease_centroids.csv. Example: "New Jersey". If this is defined, '
                                  '-lease must be None')
+
+    arg_parser.add_argument('-d', '--domain',
+                            dest='domain',
+                            default='3km',
+                            type=str,
+                            choices=['3km', '1km_wf2km'],
+                            help='Domain: operational 3km, research 1km with simulated windfarm 1km_wf2km')
 
     arg_parser.add_argument('-save_dir',
                             default='/home/coolgroup/bpu/wrf/data/wrf_nc/wea_centroids',

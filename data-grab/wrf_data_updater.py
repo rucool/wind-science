@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 11/22/2022
-Last modified: Lori Garzio 12/22/2022
+Last modified: Lori Garzio 1/19/2023
 Update U, V in existing NetCDF files (generated using wrf_data_wrangler.py) from the RU-WRF THREDDS server through a
 user-defined end date and height at specified locations. If lease and state options for filtering datasets are both
 None, this will update the files for all lease areas in ./files/lease_centroids.csv
@@ -43,17 +43,27 @@ def main(args):
     height = args.height
     lease = args.lease
     state = args.state
+    domain = args.domain
     file_dir = args.file_dir
     loglevel = args.loglevel.upper()
 
     end_date = dt.datetime.strptime(end_str, '%Y%m%d') + dt.timedelta(hours=23)
 
-    mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
+    if domain == '3km':
+        mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
+    elif domain == '1km_wf2km':
+        mlink = 'new_link'
+    else:
+        raise ValueError('Invalid domain specified')
+
+    file_dir = os.path.join(file_dir, domain)
+    file_dir_logs = os.path.join(file_dir, 'logs')
+
     ds = xr.open_dataset(mlink)
     wrf_lat = ds['XLAT']
     wrf_lon = ds['XLONG']
 
-    location_csv = '/home/wrfadmin/toolboxes/wind-science/capacity_factor_analysis/files/lease_centroids.csv'
+    location_csv = '/home/wrfadmin/toolboxes/wind-science/files/lease_centroids.csv'
     loc_df = pd.read_csv(location_csv)
     loc_df['lease_code'] = loc_df['lease'].map(lambda x: x.split(' - ')[0].replace(' ', ''))
     if np.logical_and(isinstance(lease, str), isinstance(state, str)):
@@ -72,16 +82,16 @@ def main(args):
 
     for midlon, midlat, co, st, ll, lease_code in zip(df['long'], df['lat'], df['company'], df['state'], df['lease'], df['lease_code']):
         # set up log file
-        logfile = os.path.join(file_dir, 'logs', f'{lease_code}_{height}.log')
+        logfile = os.path.join(file_dir_logs, f'{lease_code}_{height}_{domain}.log')
         logging = setup_logger(f'logging_{lease_code}', loglevel, logfile)
 
         # find the .nc file to which new data are appended
-        ncfilename = os.path.join(file_dir, f'{lease_code}_{height}.nc')
+        ncfilename = os.path.join(file_dir, f'{lease_code}_{height}_{domain}.nc')
 
         logging.info(f'Attempting to update U and V in {ncfilename}')
 
         if not os.path.isfile(ncfilename):
-            logging.warning(f'No file exists for {lease_code} {height}m')
+            logging.warning(f'No file exists for {lease_code} {height}m {domain}')
             logging.warning('Please use the wrf_data_wrangler.py code to generate the original file')
             continue
 
@@ -148,7 +158,7 @@ def main(args):
 
         # save .nc file
         outds.to_netcdf(ncfilename, encoding=encoding, format='netCDF4', engine='netcdf4', unlimited_dims='time')
-        logging.info(f'Finished updatinging {lease_code} {height}m: {tstart.strftime("%Y%m%d")} to {end_str}')
+        logging.info(f'Finished updating windspeeds for {lease_code} {height}m: {tstart.strftime("%Y%m%d")} to {end_str}')
         overall_start = pd.to_datetime(np.nanmin(outds.time.values)).strftime('%Y-%m-%dT%H:%M')
         overall_end = pd.to_datetime(np.nanmax(outds.time.values)).strftime('%Y-%m-%dT%H:%M')
         logging.info(f'Data range available in {ncfilename}: {overall_start} to {overall_end}')
@@ -182,6 +192,13 @@ if __name__ == '__main__':
                             help='Optional filter on state, valid options for state can be found in '
                                  './files/lease_centroids.csv. Example: "New Jersey". If this is defined, '
                                  '-lease must be None')
+
+    arg_parser.add_argument('-d', '--domain',
+                            dest='domain',
+                            default='3km',
+                            type=str,
+                            choices=['3km', '1km_wf2km'],
+                            help='Domain: operational 3km, research 1km with simulated windfarm 1km_wf2km')
 
     arg_parser.add_argument('-file_dir',
                             default='/home/coolgroup/bpu/wrf/data/wrf_nc/wea_centroids',
