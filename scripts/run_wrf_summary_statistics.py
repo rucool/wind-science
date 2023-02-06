@@ -90,6 +90,14 @@ def main(args):
 
     t0=min(data['time']).strftime('%Y%m%dT%H%M')
     t1=max(data['time']).strftime('%Y%m%dT%H%M')
+    t0ttl=min(data['time']).strftime('%Y-%m-%d %H:%M')
+    t1ttl=max(data['time']).strftime('%Y-%m-%d %H:%M')
+    lease = list(np.unique(data['lease']))[0]
+
+    if len(list(np.unique(data['lease_code'])))==1:
+        ttl = f'{lease}: {t0ttl} to {t1ttl}'
+    else:
+        ttl=f'{t0ttl} to {t1ttl}'
 
     if wcsv:
         df.to_csv(os.path.join(csv_savedir, f'{all_leases}-ruwrf-timeseries_{all_heights}_{t0}-{t1}.csv'))
@@ -110,7 +118,8 @@ def main(args):
         summary.main(data.copy(), dv=dv, group=group, \
             boxplotFile=boxplotname, \
             heatmapFile=heatmapname, \
-            csvFile=csvname)
+            csvFile=csvname, \
+            ttl=ttl)
     
 
 

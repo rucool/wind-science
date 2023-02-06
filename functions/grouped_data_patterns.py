@@ -20,7 +20,7 @@ pd.set_option('display.width', 320, "display.max_columns", 15)  # for display in
 # boxplots: speed, capacity factor w/ power (https://www.python-graph-gallery.com/line-chart-dual-y-axis-with-matplotlib)
 # heatmap: way to show amount of data at top and bottom (https://stackoverflow.com/questions/71417866/get-information-from-plt-hexbin)
 
-def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapFile=None, csvFile=None):
+def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapFile=None, csvFile=None, ttl=None):
     # define units
     unit_labels = dict(speed='m/s',power='kW',capacity_factor=' ')
     if max_power>50000:
@@ -34,7 +34,8 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
     month_order = [12,1,2,3,4,5,6,7,8,9,10,11]   
     t0=min(df['time']).strftime('%Y-%m-%d %H:%M')
     t1=max(df['time']).strftime('%Y-%m-%d %H:%M')
-    ttl = f'{t0} to {t1}'   
+    if not ttl:
+        ttl = f'{t0} to {t1}'   
 
     if (boxplotFile or csvFile) and group:
         df['order_var'] = np.nan
@@ -76,10 +77,22 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
             xl = str(a)
             if len(group) > 1:
                 for b in order_vars[1]:
+                    if b==order_vars[1][0] and a != order_vars[0][0]:
+                        xl=' '
+                        ovdf = pd.concat([ovdf,pd.DataFrame({'order_var': [ov], 'xlabels': [xl], dv: [np.nan]})], axis=0, ignore_index=True)
+                        xt=np.append(xt,ov)
+                        xtl=np.append(xtl,xl)
+                        ov+=1
                     ib = df[group[1]]==b
                     xl = ' '.join([str(a),str(b)])
                     if len(group) > 2:
                         for c in order_vars[2]:
+                            if c==order_vars[2][0] and a != order_vars[0][0]:
+                                xl=' '
+                                ovdf = pd.concat([ovdf,pd.DataFrame({'order_var': [ov], 'xlabels': [xl], dv: [np.nan]})], axis=0, ignore_index=True)
+                                xt=np.append(xt,ov)
+                                xtl=np.append(xtl,xl)
+                                ov+=1
                             ic = df[group[2]]==c
                             xl = ' '.join([str(a),str(b),str(c)])
                             i = np.logical_and(ia,np.logical_and(ib,ic))
