@@ -112,8 +112,9 @@ def main(args):
                 except KeyError:
                     continue
 
+        logging.info(f'Downloading variables {variables} for {domain} {height}m: {start_str} to {end_str}')
+
         for i, tm in enumerate(ds.time.values):
-            logging.info(f'Downloading variables {variables} for {domain} {height}m: {start_str} to {end_str}')
             # grab the data from the turbine locations and append to the empty data dictionary
             new_ds = xr.concat([ds.sel(time=tm, south_north=xi, west_east=yi) for xi, yi in points], dim='points')
             for v in variables:
