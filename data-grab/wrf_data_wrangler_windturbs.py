@@ -92,7 +92,7 @@ def main(args):
         var_attrs = ['units', 'long_name', 'standard_name', 'description']
         for v in variables:
             data["data_vars"][v] = dict()
-            data["data_vars"][v]["data"] = np.empty((len(ds.time), len(points)))
+            data["data_vars"][v]["data"] = np.empty((len(ds.time), len(points)), dtype='float32')
             data["data_vars"][v]["data"][:] = np.nan
             data["data_vars"][v]["dims"] = ("time", "points")
             data["data_vars"][v]["attrs"] = dict()
