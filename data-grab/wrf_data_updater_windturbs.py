@@ -148,10 +148,10 @@ if __name__ == '__main__':
 
     arg_parser.add_argument('-d', '--domain',
                             dest='domain',
-                            default='3km',
+                            default='1km_wf2km',
                             type=str,
-                            choices=['3km', '1km_wf2km'],
-                            help='Domain: operational 3km, research 1km with simulated windfarm 1km_wf2km')
+                            choices=['1km_wf2km', '1km_ctrl'],
+                            help='Domain: 1km with simulated windfarm (1km_wf2km), 1km without simulated windfarm (1km_ctrl)')
 
     arg_parser.add_argument('-tcsv', '--turbine_csv',
                             dest='turb_csv',
