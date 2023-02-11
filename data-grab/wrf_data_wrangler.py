@@ -56,7 +56,7 @@ def main(args):
         mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
         turbs_on_off = 'off'
     elif domain == '1km_wf2km':
-        mlink = 'new_link'
+        mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_1km_wf2km_processed/WRF_4.1_1km_with_Wind_Farm_Processed_Dataset_Best.html'
         turbs_on_off = 'on'
     else:
         raise ValueError('Invalid domain specified')

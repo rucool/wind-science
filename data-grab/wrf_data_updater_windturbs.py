@@ -31,7 +31,7 @@ def main(args):
     if domain == '1km_wf2km':
         mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_1km_wf2km_processed/WRF_4.1_1km_with_Wind_Farm_Processed_Dataset_Best'
     elif domain == '1km_ctrl':
-        mlink = 'link'
+        mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_1km_ctrl_processed/WRF_4.1_1km_Control_Processed_Dataset_Best'
     else:
         raise ValueError('Invalid domain specified')
 
@@ -45,7 +45,7 @@ def main(args):
     # find the .nc file to which new data are appended
     ncfilename = os.path.join(file_dir, f'{domain}_{height}.nc')
 
-    logging.info(f'Attempting to  in {ncfilename}')
+    logging.info(f'Attempting to update data in in {ncfilename}')
 
     if not os.path.isfile(ncfilename):
         logging.warning(f'No file exists for {domain} {height}m')
