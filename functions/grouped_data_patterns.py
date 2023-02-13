@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-plt.rcParams.update({'font.size': 16})
+plt.rcParams.update({'font.size': 12})
 pd.set_option('display.width', 320, "display.max_columns", 15)  # for display in pycharm console
 
 
@@ -145,19 +145,26 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
             axb=ax.twinx()
             plt.ylim([-max_power*axis_extend,max_power*(1+axis_extend)])
             plt.ylabel('power (' + unit_labels['power'] + ')')
-        #plt.suptitle(None)
-        plt.suptitle(ttl)
+        #plt.suptitle(ttl)
+        plt.title(ttl)
+        plt.suptitle('')
+        ax.set_title('')
         plt.savefig(boxplotFile, dpi=300)
         plt.close()
 
     if heatmapFile:
+        plt.rcParams.update({'font.size': 24}) 
         doy_ticks = pd.DataFrame(np.append(12,range(1,12)),columns=['month'])
         doy_ticks['day'] = 15
         doy_ticks['year'] = 2011
         doy_ticks['time'] = pd.to_datetime(doy_ticks)
         doy_ticks['doy'] = doy_ticks['time'].dt.dayofyear
         doy_ticks.loc[doy_ticks['month']==12, 'doy'] -= 365
-        doy_ticks['labels']=['Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov']
+        doy_ticks['labels']=['D','J','F','M','A','M','J','J','A','S','O','N']
+        # doy_ticks['labels']=['Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov']
+        season_breaks=pd.DataFrame({'date': ['2011-03-01','2011-06-01','2011-09-01']})
+        season_breaks['date']=pd.to_datetime(season_breaks['date'])
+        season_breaks['doy']=season_breaks['date'].dt.dayofyear
 
         if dv=='speed':
             vm = len(df)/500
@@ -185,14 +192,20 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
         plt.ylabel(dv + ' (' + unit_labels[dv] + ')')
         if dv=='speed':
             plt.ylim([0,40])
+            for x in season_breaks['doy']:
+                plt.plot([x,x],[0,40],c='black')
         elif dv=='power':
             plt.ylim([-max_power*axis_extend,max_power*(1+axis_extend)])
+            for x in season_breaks['doy']:
+                plt.plot([x,x],[-max_power*axis_extend,max_power*(1+axis_extend)],c='black')
             axb=ax.twinx()
             plt.ylim([-axis_extend,1+axis_extend])
             plt.ylabel('capacity_factor')
         elif dv=='capacity_factor':
             plt.ylabel(dv)
             plt.ylim([-axis_extend,1+axis_extend])
+            for x in season_breaks['doy']:
+                plt.plot([x,x],[-axis_extend,1+axis_extend],c='black')
             axb=ax.twinx()
             axb.ylim([-max_power*axis_extend,max_power*(1+axis_extend)])
             axb.ylabel('power (' + unit_labels['power'] + ')')

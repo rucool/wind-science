@@ -95,7 +95,7 @@ def main(args):
     lease = list(np.unique(data['lease']))[0]
 
     if len(list(np.unique(data['lease_code'])))==1:
-        ttl = f'{lease}: {t0ttl} to {t1ttl}'
+        ttl = f'{lease}: \n {t0ttl} to {t1ttl}'
     else:
         ttl=f'{t0ttl} to {t1ttl}'
 
