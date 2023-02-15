@@ -38,7 +38,7 @@ def main(args):
         turbs_on_off = 'on'
         variables.append("POWER")
     elif domain == '1km_ctrl':
-        mlink = 'link'
+        mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_1km_ctrl_processed/WRF_4.1_1km_Control_Processed_Dataset_Best'
         turbs_on_off = 'off'
     else:
         raise ValueError('Invalid domain specified')
