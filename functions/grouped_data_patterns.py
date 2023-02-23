@@ -20,13 +20,17 @@ pd.set_option('display.width', 320, "display.max_columns", 15)  # for display in
 # boxplots: speed, capacity factor w/ power (https://www.python-graph-gallery.com/line-chart-dual-y-axis-with-matplotlib)
 # heatmap: way to show amount of data at top and bottom (https://stackoverflow.com/questions/71417866/get-information-from-plt-hexbin)
 
-def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapFile=None, csvFile=None, ttl=None):
+def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapFile=None, csvFile=None, ttl=None, max_speed=40):
     # define units
     unit_labels = dict(speed='m/s',power='kW',capacity_factor=' ')
     if max_power>50000:
         max_power = max_power/1000
         df['power'] = df['power']/1000
         unit_labels['power'] = 'MW'
+        if max_power>1500:
+            max_power = max_power/1000
+            df['power'] = df['power']/1000
+            unit_labels['power'] = 'GW'
     season_order = dict(winter=1,spring=2,summer=3,fall=4)
     heat_cmap = mpl.colormaps['Reds']
     heat_cmap.set_under('white')
@@ -133,7 +137,7 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
         plt.ylabel(dv + ' (' + unit_labels[dv] + ')')
         axis_extend = 0.005
         if dv=='speed':
-            plt.ylim([0,40])
+            plt.ylim([0,max_speed])
         elif dv=='power':
             plt.ylim([-max_power*axis_extend,max_power*(1+axis_extend)])
             axb=ax.twinx()
@@ -191,9 +195,9 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
         plt.xlabel(None)
         plt.ylabel(dv + ' (' + unit_labels[dv] + ')')
         if dv=='speed':
-            plt.ylim([0,40])
+            plt.ylim([0,max_speed])
             for x in season_breaks['doy']:
-                plt.plot([x,x],[0,40],c='black')
+                plt.plot([x,x],[0,max_speed],c='black')
         elif dv=='power':
             plt.ylim([-max_power*axis_extend,max_power*(1+axis_extend)])
             for x in season_breaks['doy']:
