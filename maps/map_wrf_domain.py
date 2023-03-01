@@ -123,4 +123,4 @@ if plot1:
     ax.text(lon1[0,-1]-.1,lat1[0,-1]+.1,'RUWRF 1km',color='navy',horizontalalignment='right',verticalalignment='bottom',fontsize=6,zorder=8)
     figdesc+='1km_'
 
-plt.savefig(os.path.join(figDir,'RUWRF_domain_'+figdesc+pd.to_datetime('now').strftime('%Y%m%d')+'.png',dpi=300)
+plt.savefig(os.path.join(figDir,'RUWRF_domain_'+figdesc+pd.to_datetime('now').strftime('%Y%m%d')+'.png'),dpi=300)
