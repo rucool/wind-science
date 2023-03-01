@@ -82,11 +82,11 @@ if plotWEA:
     #planning_areas.plot(ax=ax, color='green', edgecolor='green')
     kwargs = dict()
     kwargs['edgecolor'] = 'magenta'
-    kwargs['color'] = 'magenta'
+    kwargs['facecolor'] = 'magenta'
     pf.map_add_boem_outlines(ax, lease, **kwargs)
     kwargs = dict()
     kwargs['edgecolor'] = 'green'
-    kwargs['color'] = 'green'
+    kwargs['facecolor'] = 'green'
     pf.map_add_boem_outlines(ax, plan, **kwargs)
     figdesc+='wea_'
 if plotISO:
