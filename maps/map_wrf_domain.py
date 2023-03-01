@@ -24,6 +24,7 @@ plotWEA = True
 plotISO = False
 
 domain = [-75.5, -72, 38.4, 40.6]
+coast='full'
 if plot1:
     lon1=np.genfromtxt(os.path.join(domainDir,'XLONG_M_1km.csv'),delimiter=',')
     lat1=np.genfromtxt(os.path.join(domainDir,'XLAT_M_1km.csv'),delimiter=',')
@@ -32,10 +33,12 @@ if plot3:
     lon3=np.genfromtxt(os.path.join(domainDir,'XLONG_M_3km.csv'),delimiter=',')
     lat3=np.genfromtxt(os.path.join(domainDir,'XLAT_M_3km.csv'),delimiter=',')
     domain=[np.min(lon3)-.1,np.max(lon3)+.1,np.min(lat3)-.1,np.max(lat3)+.1]
+    coast='high'
 if plot9:
     lon9=np.genfromtxt(os.path.join(domainDir,'XLONG_M_9km.csv'),delimiter=',')
     lat9=np.genfromtxt(os.path.join(domainDir,'XLAT_M_9km.csv'),delimiter=',')
     domain=[np.min(lon9)-.1,np.max(lon9)+.1,np.min(lat9)-.1,np.max(lat9)+.1]
+    coast='high'
 
 if plotWEA:
     lease = glob.glob(os.path.join(weaDir,'BOEM_Wind_Leases_*.shp'))[0]
@@ -99,28 +102,28 @@ if plotISO:
 
 lw=1.5
 if plot3:
-    ax.plot(lon3[0,:],lat3[0,:],color='red',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
-    ax.plot(lon3[-1,:],lat3[-1,:],color='red',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
-    ax.plot(lon3[:,0],lat3[:,0],color='red',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
-    ax.plot(lon3[:,-1],lat3[:,-1],color='red',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
+    ax.plot(lon3[0,:],lat3[0,:],color='red',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
+    ax.plot(lon3[-1,:],lat3[-1,:],color='red',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
+    ax.plot(lon3[:,0],lat3[:,0],color='red',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
+    ax.plot(lon3[:,-1],lat3[:,-1],color='red',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
 if plot9:
-    ax.plot(lon9[0,:],lat9[0,:],color='blue',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
-    ax.plot(lon9[-1,:],lat9[-1,:],color='blue',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
-    ax.plot(lon9[:,0],lat9[:,0],color='blue',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
-    ax.plot(lon9[:,-1],lat9[:,-1],color='blue',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
+    ax.plot(lon9[0,:],lat9[0,:],color='blue',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
+    ax.plot(lon9[-1,:],lat9[-1,:],color='blue',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
+    ax.plot(lon9[:,0],lat9[:,0],color='blue',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
+    ax.plot(lon9[:,-1],lat9[:,-1],color='blue',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
 if plot1:
-    ax.plot(lon1[0,:],lat1[0,:],color='navy',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
-    ax.plot(lon1[-1,:],lat1[-1,:],color='navy',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
-    ax.plot(lon1[:,0],lat1[:,0],color='navy',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
-    ax.plot(lon1[:,-1],lat1[:,-1],color='navy',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
+    ax.plot(lon1[0,:],lat1[0,:],color='navy',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
+    ax.plot(lon1[-1,:],lat1[-1,:],color='navy',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
+    ax.plot(lon1[:,0],lat1[:,0],color='navy',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
+    ax.plot(lon1[:,-1],lat1[:,-1],color='navy',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
 if plot9:
-    ax.text(lon9[0,-1]-.1,lat9[0,-1]+.3,'RUWRF 9km',color='blue',horizontalalignment='right',verticalalignment='bottom',fontsize=14,zorder=8)
+    ax.text(lon9[0,-1]-.1,lat9[0,-1]+.3,'RUWRF 9km',color='blue',horizontalalignment='right',verticalalignment='bottom',fontsize=14,zorder=20)
     figdesc+='9km_'
 if plot3:
-    ax.text(lon3[0,-1]-.1,lat3[0,-1]+.1,'RUWRF 3km',color='red',horizontalalignment='right',verticalalignment='bottom',fontsize=14,zorder=8)
+    ax.text(lon3[0,-1]-.1,lat3[0,-1]+.1,'RUWRF 3km',color='red',horizontalalignment='right',verticalalignment='bottom',fontsize=14,zorder=20)
     figdesc+='3km_'
 if plot1:
-    ax.text(lon1[0,-1]-.1,lat1[0,-1]+.1,'RUWRF 1km',color='navy',horizontalalignment='right',verticalalignment='bottom',fontsize=6,zorder=8)
+    ax.text(lon1[0,-1]-.1,lat1[0,-1]+.1,'RUWRF 1km',color='navy',horizontalalignment='right',verticalalignment='bottom',fontsize=6,zorder=20)
     figdesc+='1km_'
 
 plt.savefig(os.path.join(figDir,'RUWRF_domain_'+figdesc+pd.to_datetime('now').strftime('%Y%m%d')+'.png'),dpi=300)
