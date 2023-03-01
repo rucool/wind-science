@@ -99,20 +99,20 @@ if plotISO:
 
 lw=1.5
 if plot3:
-    ax.plot(lon3[0,:],lat3[0,:],color='red',linewidth=lw,zorder=8)
-    ax.plot(lon3[-1,:],lat3[-1,:],color='red',linewidth=lw,zorder=8)
-    ax.plot(lon3[:,0],lat3[:,0],color='red',linewidth=lw,zorder=8)
-    ax.plot(lon3[:,-1],lat3[:,-1],color='red',linewidth=lw,zorder=8)
+    ax.plot(lon3[0,:],lat3[0,:],color='red',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
+    ax.plot(lon3[-1,:],lat3[-1,:],color='red',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
+    ax.plot(lon3[:,0],lat3[:,0],color='red',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
+    ax.plot(lon3[:,-1],lat3[:,-1],color='red',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
 if plot9:
-    ax.plot(lon9[0,:],lat9[0,:],color='blue',linewidth=lw,zorder=8)
-    ax.plot(lon9[-1,:],lat9[-1,:],color='blue',linewidth=lw,zorder=8)
-    ax.plot(lon9[:,0],lat9[:,0],color='blue',linewidth=lw,zorder=8)
-    ax.plot(lon9[:,-1],lat9[:,-1],color='blue',linewidth=lw,zorder=8)
+    ax.plot(lon9[0,:],lat9[0,:],color='blue',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
+    ax.plot(lon9[-1,:],lat9[-1,:],color='blue',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
+    ax.plot(lon9[:,0],lat9[:,0],color='blue',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
+    ax.plot(lon9[:,-1],lat9[:,-1],color='blue',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
 if plot1:
-    ax.plot(lon1[0,:],lat1[0,:],color='navy',linewidth=lw,zorder=8)
-    ax.plot(lon1[-1,:],lat1[-1,:],color='navy',linewidth=lw,zorder=8)
-    ax.plot(lon1[:,0],lat1[:,0],color='navy',linewidth=lw,zorder=8)
-    ax.plot(lon1[:,-1],lat1[:,-1],color='navy',linewidth=lw,zorder=8)
+    ax.plot(lon1[0,:],lat1[0,:],color='navy',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
+    ax.plot(lon1[-1,:],lat1[-1,:],color='navy',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
+    ax.plot(lon1[:,0],lat1[:,0],color='navy',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
+    ax.plot(lon1[:,-1],lat1[:,-1],color='navy',linewidth=lw, transform=ccrs.PlateCarree(),zorder=8)
 if plot9:
     ax.text(lon9[0,-1]-.1,lat9[0,-1]+.3,'RUWRF 9km',color='blue',horizontalalignment='right',verticalalignment='bottom',fontsize=14,zorder=8)
     figdesc+='9km_'
