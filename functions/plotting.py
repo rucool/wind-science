@@ -7,8 +7,9 @@ from cartopy.io.shapereader import Reader
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
-def map_add_boem_outlines(ax, shpfile, edgecolor=None, projection=None, zorder=None, alpha=None):
+def map_add_boem_outlines(ax, shpfile, edgecolor=None, facecolor=None, projection=None, zorder=None, alpha=None):
     edgecolor = edgecolor or 'black'
+    facecolor = facecolor or 'none'
     projection = projection or ccrs.PlateCarree()
     zorder = zorder or 1
     alpha = alpha or 1
