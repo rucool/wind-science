@@ -117,13 +117,13 @@ if plot1:
     ax.plot(lon1[:,0],lat1[:,0],color='navy',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
     ax.plot(lon1[:,-1],lat1[:,-1],color='navy',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
 if plot9:
-    ax.text(lon9[0,-1]-.1,lat9[0,-1]+.3,'RUWRF 9km',color='blue',horizontalalignment='right',verticalalignment='bottom',fontsize=14,zorder=20)
+    ax.text(lon9[0,-1]-.1,lat9[0,-1]+.3,'RUWRF 9km',color='blue',horizontalalignment='right',verticalalignment='bottom',fontsize=14, transform=ccrs.PlateCarree(),zorder=20)
     figdesc+='9km_'
 if plot3:
-    ax.text(lon3[0,-1]-.1,lat3[0,-1]+.1,'RUWRF 3km',color='red',horizontalalignment='right',verticalalignment='bottom',fontsize=14,zorder=20)
+    ax.text(lon3[0,-1]-.1,lat3[0,-1]+.1,'RUWRF 3km',color='red',horizontalalignment='right',verticalalignment='bottom',fontsize=14, transform=ccrs.PlateCarree(),zorder=20)
     figdesc+='3km_'
 if plot1:
-    ax.text(lon1[0,-1]-.1,lat1[0,-1]+.1,'RUWRF 1km',color='navy',horizontalalignment='right',verticalalignment='bottom',fontsize=6,zorder=20)
+    ax.text(lon1[0,-1]-.1,lat1[0,-1]+.1,'RUWRF 1km',color='navy',horizontalalignment='right',verticalalignment='bottom',fontsize=6, transform=ccrs.PlateCarree(),zorder=20)
     figdesc+='1km_'
 
 plt.savefig(os.path.join(figDir,'RUWRF_domain_'+figdesc+pd.to_datetime('now').strftime('%Y%m%d')+'.png'),dpi=300)
