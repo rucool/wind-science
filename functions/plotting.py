@@ -18,7 +18,7 @@ def map_add_boem_outlines(ax, shpfile, edgecolor=None, facecolor=None, projectio
         Reader(shpfile).geometries(),
         projection,
         edgecolor=edgecolor,
-        facecolor='none'
+        facecolor=facecolor
         )
 
     ax.add_feature(shape_feature, zorder=zorder, alpha=alpha)
@@ -117,3 +117,45 @@ def plot_pcolormesh(fig, ax, lon_data, lat_data, var_data, cmap='jet', clab=None
         cb.set_label(label=clab, fontsize=14)
     if cbar_ticks != 'none':
         cb.ticks = cbar_ticks
+
+
+def plot_regions():
+    regions = dict(
+        full_grid=dict(quiver_subset=dict(_10m=11, _160m=13, _200m=13, _250m=13, _500m=13),
+                       quiver_scale=45,
+                       extent=[-79.79, -69.2, 34.5, 43],
+                       xticks=[-78, -76, -74, -72, -70],
+                       yticks=[36, 38, 40, 42],
+                       subset=False,
+                       lease_area=False),
+        mab=dict(quiver_subset=dict(_10m=7, _160m=8, _200m=8, _250m=8, _500m=8),
+                 quiver_scale=40,
+                 extent=[-77.2, -69.6, 36, 41.8],
+                 xticks=[-75, -73, -71],
+                 yticks=[37, 39, 41],
+                 subset=True,
+                 lease_area=True),
+        nj=dict(quiver_subset=dict(_10m=4, _160m=5, _200m=5, _250m=5, _500m=5),
+                quiver_scale=40,
+                extent=[-75.7, -71.5, 38.1, 41.2],
+                xticks=[-75, -74, -73, -72],
+                yticks=[39, 40, 41],
+                subset=True,
+                lease_area=True),
+        southern_nj=dict(quiver_subset=dict(_10m=3, _160m=3, _200m=3, _250m=3, _500m=3),
+                         quiver_scale=40,
+                         extent=[-75.6, -73, 38.6, 40.5],
+                         xticks=[-75, -74.5, -74, -73.5],
+                         yticks=[39, 39.5, 40],
+                         subset=True,
+                         lease_area=True),
+        windturb=dict(quiver_subset=dict(_10m=3, _160m=3, _200m=3, _250m=3, _500m=3),
+                      quiver_scale=40,
+                      extent=[-74.8, -73.7, 38.8, 39.8],
+                      xticks=[-74.7, -74.4, -74.1, -73.8],
+                      yticks=[39, 39.3, 39.6],
+                      subset=True,
+                      lease_area=True)
+    )
+
+    return regions
