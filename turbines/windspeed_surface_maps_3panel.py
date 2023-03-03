@@ -27,7 +27,7 @@ def main(args):
     ws_lims = args.ws_lims
     save_dir = args.save_dir
 
-    plot_turbs = '/Users/garzio/Documents/repo/rucool/wind-science/files/turbine_locations_final.csv'
+    plot_turbs = '/home/wrfadmin/toolboxes/wind-science/files/turbine_locations_final.csv'
     file_dir = '/home/coolgroup/ru-wrf/real-time/v4.1_parallel/processed_windturbs'
 
     yr = pd.to_datetime(ymd).year
