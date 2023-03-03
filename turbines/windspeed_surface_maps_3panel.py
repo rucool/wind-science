@@ -27,7 +27,8 @@ def main(args):
     ws_lims = args.ws_lims
     save_dir = args.save_dir
 
-    plot_turbs = '/home/wrfadmin/toolboxes/wind-science/files/turbine_locations_final.csv'
+    turb_csv = pd.read_csv('/home/wrfadmin/toolboxes/wind-science/files/turbine_locations_final.csv')
+    power_curve = pd.read_csv('/home/wrfadmin/toolboxes/wind-science/files/wrf_lw15mw_power.csv')
     file_dir = '/home/coolgroup/ru-wrf/real-time/v4.1_parallel/processed_windturbs'
 
     yr = pd.to_datetime(ymd).year
@@ -41,6 +42,8 @@ def main(args):
 
     files = sorted(glob.glob(os.path.join(file_dir, '1km_wf2km', ymd, '*.nc')))
     for fname in files:
+        if fname.split('_')[-1] == 'H000.nc':
+            continue
         f = fname.split('/')[-1]
 
         # find the corresponding control file
@@ -77,15 +80,32 @@ def main(args):
             speed = cf.wind_uv_to_spd(u, v)
             speed_ctrl = cf.wind_uv_to_spd(uctrl, vctrl)
 
-            diff = speed - speed_ctrl
-            masked_diff = np.ma.masked_inside(diff, -0.5, 0.5)
-
             lon = speed.XLONG.values
             lat = speed.XLAT.values
 
+            # get power from windfarm file in kW
+            power = ds.POWER.values / 1000
+
+            # calculate power from control file in kW
+            # find the turbine location indices
+            power_ctrl = np.array([])
+            for i, row in turb_csv.iterrows():
+                a = abs(lat - row.lat) + abs(lon - row.lon)
+                i, j = np.unravel_index(a.argmin(), a.shape)
+                power_calc = np.interp(speed_ctrl[i, j].values, power_curve['Wind Speed'], power_curve['Power'])
+                power_ctrl = np.append(power_ctrl, power_calc)
+
+            # calculate total windfarm power generated in GW
+            cumulative_power = np.round(np.sum(power) / 1000000, 2)
+            cumulative_power_ctrl = np.round(np.sum(power_ctrl) / 1000000, 2)
+            cumulative_power_diff = np.round(cumulative_power - cumulative_power_ctrl, 2)
+
+            diff = speed - speed_ctrl
+            masked_diff = np.ma.masked_inside(diff, -0.5, 0.5)
+
             fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 8), sharey=True,
                                                 subplot_kw=dict(projection=ccrs.Mercator()))
-            fig.suptitle(main_title, fontsize=17, y=.85)
+            fig.suptitle(main_title, fontsize=17, y=.86)
 
             # args for generating maps
             kwargs = dict()
@@ -147,13 +167,12 @@ def main(args):
                        scale=30, width=.002, headlength=4, transform=ccrs.PlateCarree())
 
             # add turbine locations to wf and diff
-            df = pd.read_csv(plot_turbs)
-            ax2.scatter(df.lon, df.lat, s=.5, color='k', transform=ccrs.PlateCarree())
-            ax3.scatter(df.lon, df.lat, s=.5, color='k', transform=ccrs.PlateCarree())
+            ax2.scatter(turb_csv.lon, turb_csv.lat, s=.5, color='k', transform=ccrs.PlateCarree())
+            ax3.scatter(turb_csv.lon, turb_csv.lat, s=.5, color='k', transform=ccrs.PlateCarree())
 
-            ax1.set_title('Control')
-            ax2.set_title('Wind Farm')
-            ax3.set_title('Difference')
+            ax1.set_title(f'Control (Power: {cumulative_power_ctrl} GW)', y=1.02)
+            ax2.set_title(f'Wind Farm (Power: {cumulative_power} GW)', y=1.02)
+            ax3.set_title(f'Difference (Power diff: {cumulative_power_diff} GW)', y=1.02)
             plt.savefig(save_file, dpi=200)
             plt.close()
 
