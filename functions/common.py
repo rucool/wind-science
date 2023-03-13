@@ -8,6 +8,27 @@ import pandas as pd
 import datetime as dt
 
 
+def daterange_interval(interval, start_date, end_date):
+    """
+    Break up date range into the plotting interval specified
+    """
+    if interval == 'monthly':
+        daterange = pd.date_range(start_date, end_date, freq='M')
+        start = []
+        end = []
+        for i, dr in enumerate(daterange):
+            if i == 0:
+                start.append(start_date)
+            else:
+                start.append((daterange[i - 1] + dt.timedelta(days=1)))
+            end.append(dr)
+        if dr + dt.timedelta(days=1) != end_date:
+            start.append((dr + dt.timedelta(days=1)))
+            end.append(end_date)
+
+    return start, end
+
+
 def setup_logger(name, loglevel, logfile):
     logger = logging.getLogger(name)
 
