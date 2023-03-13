@@ -16,3 +16,4 @@ dependencies:
   - pynio==1.5.5
   - erddapy==1.2.1
   - cool_maps==0.0.8
+  - windrose==1.8.0
