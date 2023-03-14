@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 3/3/2023
-Last modified: 3/3/2023
+Last modified: 3/14/2023
 Creates a 3-panel plot with surface maps of instantaneous windspeed with and without turbines, and differences
 """
 
@@ -172,7 +172,7 @@ def main(args):
 
             ax1.set_title(f'Control (Power: {cumulative_power_ctrl} GW)', y=1.02)
             ax2.set_title(f'Wind Farm (Power: {cumulative_power} GW)', y=1.02)
-            ax3.set_title(f'Difference (Power diff: {cumulative_power_diff} GW)', y=1.02)
+            ax3.set_title(f'Wind Speed Difference', y=1.02)
             plt.savefig(save_file, dpi=200)
             plt.close()
 
