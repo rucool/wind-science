@@ -154,18 +154,21 @@ def main(args):
     plt.close()
 
     # plot average wind direction as a quiver plot for turbine locations
-    fig, ax = plt.subplots(figsize=(13, 7))
+    fig, (ax1, ax2) = plt.subplots(2, figsize=(13, 7), sharex=True, sharey=True)
 
     #ax.quiver(direction_avg_ctrl.time, 0, uavg_ctrl, vavg_ctrl, headlength=1, headaxislength=1, width=0.004, alpha=0.5)
-    ax.quiver(direction_avg_ctrl.time, 0, uavg_ctrl, vavg_ctrl, scale=120, alpha=0.5)
+    ax1.quiver(direction_avg_ctrl.time, 0, uavg_ctrl, vavg_ctrl, scale=120, alpha=0.5, label='Control')
+    ax2.quiver(direction_avg.time, 0, uavg, vavg, scale=120, alpha=0.5, label='Turbines')
 
-    ax.set_ylabel('Wind Farm Average Wind Direction')
-    ax.set_xlabel('Time (GMT)')
-    ax.legend(loc='best', fontsize=10)
+    ax1.set_ylabel('Average Wind Direction')
+    ax2.set_ylabel('Average Wind Direction')
+    ax2.set_xlabel('Time (GMT)')
+    ax1.set_title('Control')
+    ax2.set_title('Wind Farm')
 
-    format_date_axis(ax)
+    format_date_axis(ax2)
 
-    save_file = os.path.join(save_dir, f'control_timeseries_winddirection_quiver_{start_str}_{end_str}.png')
+    save_file = os.path.join(save_dir, f'quiver_timeseries_{start_str}_{end_str}.png')
     plt.savefig(save_file, dpi=200)
     plt.close()
 
