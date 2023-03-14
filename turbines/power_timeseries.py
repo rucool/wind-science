@@ -2,8 +2,9 @@
 
 """
 Author: Lori Garzio on 2/22/2023
-Last modified: 2/23/2023
-Plot timeseries of cumulative wind farm power from RU-WRF simulated turbines vs control
+Last modified: 3/14/2023
+Plot timeseries of cumulative wind farm power, average wind speed and direction from RU-WRF simulated turbines vs
+control
 """
 
 import argparse
@@ -20,7 +21,8 @@ plt.rcParams.update({'font.size': 12})  # all font sizes are 12 unless otherwise
 
 
 def format_date_axis(axis):
-    datef = mdates.DateFormatter('%m-%d\n%H:%M')
+    #datef = mdates.DateFormatter('%m-%d\n%H:%M')
+    datef = mdates.DateFormatter('%b-%d\n%Y')
     axis.xaxis.set_major_formatter(datef)
 
 
@@ -53,11 +55,23 @@ def main(args):
                               dims=speed.dims)
     cumsum_power_kw_calc = power_calc.sum(dim='points')
 
+    # calculate average wind speed and direction
+    speed_avg = speed.mean(dim='points')
+    uavg = ds.U.mean(dim='points')
+    vavg = ds.V.mean(dim='points')
+    direction_avg = cf.wind_uv_to_dir(uavg, vavg)
+
     # calculate power for the windfarm location for the control run using wind speeds
-    speed = cf.wind_uv_to_spd(ds_ctrl.U, ds_ctrl.V)
-    power_calc = xr.DataArray(np.interp(speed, power_curve['Wind Speed'], power_curve['Power']), coords=speed.coords,
-                              dims=speed.dims)
-    cumsum_power_kw_calc_ctrl = power_calc.sum(dim='points')
+    speed_ctrl = cf.wind_uv_to_spd(ds_ctrl.U, ds_ctrl.V)
+    power_calc_ctrl = xr.DataArray(np.interp(speed_ctrl, power_curve['Wind Speed'], power_curve['Power']),
+                                   coords=speed_ctrl.coords, dims=speed_ctrl.dims)
+    cumsum_power_kw_calc_ctrl = power_calc_ctrl.sum(dim='points')
+
+    # calculate average wind speed and direction
+    speed_avg_ctrl = speed_ctrl.mean(dim='points')
+    uavg_ctrl = ds_ctrl.U.mean(dim='points')
+    vavg_ctrl = ds_ctrl.V.mean(dim='points')
+    direction_avg_ctrl = cf.wind_uv_to_dir(uavg_ctrl, vavg_ctrl)
 
     overall_sum_gw = np.round(np.sum(cumsum_power_kw.values) / 1000000, 2)
     overall_sum_calc_gw = np.round(np.sum(cumsum_power_kw_calc.values) / 1000000, 2)
@@ -67,6 +81,7 @@ def main(args):
     print(f'Total power: simluated wind farm calculated {overall_sum_calc_gw} GW')
     print(f'Total power: control {overall_sum_ctrl_gw} GW')
 
+    # plot power
     fig, ax = plt.subplots(figsize=(13, 7))
 
     ax.plot(cumsum_power_kw_calc_ctrl.time, cumsum_power_kw_calc_ctrl / 1000000, color='#d95f02', label='Control')  # orange
@@ -86,6 +101,7 @@ def main(args):
     plt.savefig(save_file, dpi=200)
     plt.close()
 
+    # plot power calculated vs power output by the model
     fig, ax = plt.subplots(figsize=(13, 7))
 
     ax.plot(cumsum_power_kw_calc.time, cumsum_power_kw_calc / 1000000, color='#d95f02', label='Turbines Calculated')  # orange
@@ -98,6 +114,58 @@ def main(args):
     format_date_axis(ax)
 
     save_file = os.path.join(save_dir, f'turbine_timeseries_power_vs_calculated_{start_str}_{end_str}.png')
+    plt.savefig(save_file, dpi=200)
+    plt.close()
+
+    # plot average windspeed for turbine locations
+    fig, ax = plt.subplots(figsize=(13, 7))
+
+    plt.axhline(y=3, ls='--', c='gray')
+    plt.axhline(y=10.9, ls='--', c='gray')
+
+    ax.plot(speed_avg_ctrl.time, speed_avg_ctrl, color='#d95f02', label='Control')  # orange
+    ax.plot(speed_avg.time, speed_avg, color='#7570b3', label='Turbines')  # purple
+
+    ax.set_ylabel('Wind Farm Average Wind Speed (m/s)')
+    ax.set_xlabel('Time (GMT)')
+    ax.legend(loc='best', fontsize=10)
+    #ax.set_ylim(0, 20)
+
+    format_date_axis(ax)
+
+    save_file = os.path.join(save_dir, f'turbine_vs_control_timeseries_windspeed_{start_str}_{end_str}.png')
+    plt.savefig(save_file, dpi=200)
+    plt.close()
+
+    # plot average wind direction for turbine locations
+    fig, ax = plt.subplots(figsize=(13, 7))
+
+    ax.plot(direction_avg_ctrl.time, direction_avg_ctrl, color='#d95f02', label='Control')  # orange
+    ax.plot(direction_avg.time, direction_avg, color='#7570b3', label='Turbines')  # purple
+
+    ax.set_ylabel('Wind Farm Average Wind Direction (Degrees)')
+    ax.set_xlabel('Time (GMT)')
+    ax.legend(loc='best', fontsize=10)
+
+    format_date_axis(ax)
+
+    save_file = os.path.join(save_dir, f'turbine_vs_control_timeseries_winddirection_{start_str}_{end_str}.png')
+    plt.savefig(save_file, dpi=200)
+    plt.close()
+
+    # plot average wind direction as a quiver plot for turbine locations
+    fig, ax = plt.subplots(figsize=(13, 7))
+
+    #ax.quiver(direction_avg_ctrl.time, 0, uavg_ctrl, vavg_ctrl, headlength=1, headaxislength=1, width=0.004, alpha=0.5)
+    ax.quiver(direction_avg_ctrl.time, 0, uavg_ctrl, vavg_ctrl, scale=120, alpha=0.5)
+
+    ax.set_ylabel('Wind Farm Average Wind Direction')
+    ax.set_xlabel('Time (GMT)')
+    ax.legend(loc='best', fontsize=10)
+
+    format_date_axis(ax)
+
+    save_file = os.path.join(save_dir, f'control_timeseries_winddirection_quiver_{start_str}_{end_str}.png')
     plt.savefig(save_file, dpi=200)
     plt.close()
 
