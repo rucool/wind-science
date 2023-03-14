@@ -160,11 +160,9 @@ def main(args):
     ax1.quiver(direction_avg_ctrl.time, 0, uavg_ctrl, vavg_ctrl, scale=120, alpha=0.5, label='Control')
     ax2.quiver(direction_avg.time, 0, uavg, vavg, scale=120, alpha=0.5, label='Turbines')
 
-    ax1.set_ylabel('Average Wind Direction')
-    ax2.set_ylabel('Average Wind Direction')
     ax2.set_xlabel('Time (GMT)')
-    ax1.set_title('Control')
-    ax2.set_title('Wind Farm')
+    ax1.set_title('Average Wind Direction: Control')
+    ax2.set_title('Average Wind Direction: Wind Farm')
 
     format_date_axis(ax2)
 
