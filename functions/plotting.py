@@ -7,6 +7,22 @@ from cartopy.io.shapereader import Reader
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
+def add_contours(ax, londata, latdata, vardata, clist, label_format=None):
+    """
+    Adds black contour lines with labels to a cartopy map object
+    :param ax: plotting axis object
+    :param londata: longitude data
+    :param latdata: latitude data
+    :param vardata: variable data
+    :param clist: list of contour levels
+    :param label_format: optional format for contour labels (e.g. '%.1f')
+    """
+    label_format = label_format or '%d'
+
+    CS = ax.contour(londata, latdata, vardata, clist, colors='black', linewidths=.5, transform=ccrs.PlateCarree())
+    ax.clabel(CS, inline=True, fontsize=10.5, fmt=label_format)
+
+
 def map_add_boem_outlines(ax, shpfile, edgecolor=None, facecolor=None, projection=None, zorder=None, alpha=None):
     edgecolor = edgecolor or 'black'
     facecolor = facecolor or 'none'
