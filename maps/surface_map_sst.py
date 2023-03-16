@@ -52,7 +52,10 @@ def main(args):
     save_dir = args.save_dir
 
     start_date = dt.datetime.strptime(start_str, '%Y%m%d')
-    end_date = dt.datetime.strptime(end_str, '%Y%m%d')
+    try:
+        end_date = dt.datetime.strptime(end_str, '%Y%m%d')
+    except ValueError:
+        end_date = 'none'
 
     plt_region = pf.plot_regions()
     extent = plt_region[plot_region]['extent']
@@ -69,7 +72,7 @@ def main(args):
     else:
         raise ValueError('Invalid domain specified')
 
-    if end_date - start_date == dt.timedelta(0):
+    if end_date == 'none':
         save_dir = os.path.join(save_dir, 'surface_maps_sst', 'daily', start_str[0:6])
         save_file = f'ruwrf_sst_{domain}_{plot_region}_{start_str}.png'
         title = f'{title_label} SST {start_date.strftime("%Y-%m-%d")}'
@@ -133,15 +136,15 @@ if __name__ == '__main__':
                             dest='start',
                             default='20220801',
                             type=str,
-                            help='Start Date in format YYYYMMDD. If end date equals start date, a surface map for just'
+                            help='Start Date in format YYYYMMDD. If end date is not specified, a surface map for just'
                                  'that day is provided. Otherwise a surface map of average SST for the date range'
                                  'is provided.')
 
     arg_parser.add_argument('-e', '--end',
                             dest='end',
-                            default='20220801',
+                            default='none',
                             type=str,
-                            help='End Date in format YYYYMMDD. If end date equals start date, a surface map for just'
+                            help='End Date in format YYYYMMDD. If end date is not specified, a surface map for just'
                                  'that day is provided. Otherwise a surface map of average SST for the date range'
                                  'is provided.')
 
@@ -163,6 +166,12 @@ if __name__ == '__main__':
                             default=[18, 31],
                             type=list,
                             help='Colorbar limits [min, max]')
+
+    # arg_parser.add_argument('-coastline',
+    #                         default='full',
+    #                         type=str,
+    #                         choices=['full', 'high', 'mid', 'low'],
+    #                         help='Coastline resolution')
 
     arg_parser.add_argument('-save_dir',
                             default='/www/web/rucool/windenergy/ru-wrf/windturbs/plots',
