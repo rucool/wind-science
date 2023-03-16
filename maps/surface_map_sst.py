@@ -165,12 +165,12 @@ if __name__ == '__main__':
 
     arg_parser.add_argument('-cmin',
                             default=18,
-                            type=list,
+                            type=int,
                             help='Colorbar minimum')
 
     arg_parser.add_argument('-cmax',
                             default=31,
-                            type=list,
+                            type=int,
                             help='Colorbar maximum')
 
     # arg_parser.add_argument('-coastline',
