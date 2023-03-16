@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 3/13/2023
-Last modified: 3/13/2023
+Last modified: 3/16/2023
 Creates wind rose plots from WRF data at user-defined time intervals, heights, and locations.
 """
 
@@ -86,18 +86,25 @@ def main(args):
     if len(df) == 0:
         raise ValueError('Please provide a valid lease code, found in ./files/lease_centroids.csv (i.e. "OCS-A0512")')
 
+    ds = xr.open_dataset(mlink)
+    ds = ds.sel(time=slice(start_date, end_date))
+
     # break up date range into the plotting interval specified
     if interval == 'none':
-        start, end = [start_date], [end_date]
+        intervals = [[start_date, end_date]]
         save_dir = os.path.join(save_dir, location)
     else:
-        start, end = cf.daterange_interval(interval, start_date, end_date)
+        test = ds.time
+        intervals = cf.daterange_interval(interval, test)
         save_dir = os.path.join(save_dir, location, interval)
 
     os.makedirs(save_dir, exist_ok=True)
 
-    ds = xr.open_dataset(mlink)
-    for sd, ed in zip(start, end):
+    for intvl in intervals:
+        sd = intvl[0]
+        ed = intvl[1]
+        #sd = dt.datetime(2022, 3, 1, 0, 0)  # for debugging
+        #ed = dt.datetime(2022, 3, 1, 0, 0)  # for debugging
         dst = ds.sel(time=slice(sd, ed + dt.timedelta(hours=23)))
         if len(dst.time) == 0:
             raise ValueError(f'No data found for: {domain}, {sd.strftime("%Y%m%d")} to {ed.strftime("%Y%m%d")}')
@@ -163,7 +170,7 @@ if __name__ == '__main__':
                             dest='interval',
                             default='monthly',
                             type=str,
-                            choices=['monthly', 'none'],
+                            choices=['monthly', 'seasonal', 'none'],
                             help='Interval into which the time range provided is divided. If "none", the entire time '
                                  'range provided is grouped into one windrose.')
 
