@@ -105,7 +105,7 @@ def main(args):
         ed = intvl[1]
         #sd = dt.datetime(2022, 3, 1, 0, 0)  # for debugging
         #ed = dt.datetime(2022, 3, 1, 0, 0)  # for debugging
-        dst = ds.sel(time=slice(sd, ed + dt.timedelta(hours=23)))
+        dst = ds.sel(time=slice(sd, ed))
         if len(dst.time) == 0:
             raise ValueError(f'No data found for: {domain}, {sd.strftime("%Y%m%d")} to {ed.strftime("%Y%m%d")}')
         lat = dst['XLAT']
