@@ -48,7 +48,8 @@ def main(args):
     end_str = args.end
     domain = args.domain
     plot_region = args.plot_region
-    clims = args.clims
+    cmin = args.cmin
+    cmax = args.cmax
     save_dir = args.save_dir
 
     start_date = dt.datetime.strptime(start_str, '%Y%m%d')
@@ -106,9 +107,9 @@ def main(args):
     pf.add_contours(ax, lon, lat, sst_sub.values, contour_list)
 
     # define color map
-    bins = clims[1] - clims[0]
+    bins = cmax - cmin
     cmap = cmo.cm.thermal
-    levels = MaxNLocator(nbins=bins).tick_values(clims[0], clims[1])
+    levels = MaxNLocator(nbins=bins).tick_values(cmin, cmax)
     norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
 
     kwargs = dict()
@@ -162,10 +163,15 @@ if __name__ == '__main__':
                             choices=['full_grid', 'mab', 'nj', 'southern_nj', 'windturb'],
                             help='Region to plot')
 
-    arg_parser.add_argument('-clims',
-                            default=[18, 31],
+    arg_parser.add_argument('-cmin',
+                            default=18,
                             type=list,
-                            help='Colorbar limits [min, max]')
+                            help='Colorbar minimum')
+
+    arg_parser.add_argument('-cmax',
+                            default=31,
+                            type=list,
+                            help='Colorbar maximum')
 
     # arg_parser.add_argument('-coastline',
     #                         default='full',
