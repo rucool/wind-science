@@ -2,8 +2,9 @@
 
 """
 Author: Lori Garzio on 3/14/2023
-Last modified: 3/14/2023
-Creates a surface map of sea surface temperature for a user-defined date, domain, and region/extent
+Last modified: 3/16/2023
+Creates a surface map of sea surface temperature for a user-defined date, domain, and region/extent. If a date range
+is specified, average SST is plotted.
 """
 
 import argparse
@@ -43,17 +44,15 @@ def subset_grid(ext, data, lon_name, lat_name):
 
 
 def main(args):
-    ymd = args.ymd
+    start_str = args.start
+    end_str = args.end
     domain = args.domain
     plot_region = args.plot_region
     clims = args.clims
     save_dir = args.save_dir
 
-    ymd_dt = dt.datetime.strptime(ymd, '%Y%m%d')
-    ym = ymd[0:6]
-
-    save_dir = os.path.join(save_dir, 'surface_maps_sst', ym)
-    os.makedirs(save_dir, exist_ok=True)
+    start_date = dt.datetime.strptime(start_str, '%Y%m%d')
+    end_date = dt.datetime.strptime(end_str, '%Y%m%d')
 
     plt_region = pf.plot_regions()
     extent = plt_region[plot_region]['extent']
@@ -70,10 +69,30 @@ def main(args):
     else:
         raise ValueError('Invalid domain specified')
 
+    if end_date - start_date == dt.timedelta(0):
+        save_dir = os.path.join(save_dir, 'surface_maps_sst', 'daily', start_str[0:6])
+        save_file = f'ruwrf_sst_{domain}_{plot_region}_{start_str}.png'
+        title = f'{title_label} SST {start_date.strftime("%Y-%m-%d")}'
+        date_slice = start_date + dt.timedelta(hours=1)
+        color_label = 'SST (\N{DEGREE SIGN}C)'
+    else:
+        save_dir = os.path.join(save_dir, 'surface_maps_sst', 'averages', start_str[0:4])
+        save_file = f'ruwrf_avg_sst_{domain}_{plot_region}_{start_str}_{end_str}.png'
+        title = f'{title_label} Average SST {start_date.strftime("%Y-%m-%d")} to {end_date.strftime("%Y-%m-%d")}'
+        date_slice = pd.date_range(start_date, end_date) + dt.timedelta(hours=1)
+        color_label = 'Average SST (\N{DEGREE SIGN}C)'
+
+    os.makedirs(save_dir, exist_ok=True)
+
     ds = xr.open_dataset(mlink)
-    ds = ds.sel(time=ymd_dt + dt.timedelta(hours=1))
+    ds = ds.sel(time=date_slice)
 
     sst = ds.SST - 273.15  # convert from K to degrees C
+
+    try:
+        sst = sst.mean(dim='time')
+    except ValueError:
+        print('no averaging required')
 
     sst_sub, lon, lat = subset_grid(extent, sst, 'XLONG', 'XLAT')
 
@@ -93,17 +112,15 @@ def main(args):
     kwargs['norm_clevs'] = norm
     kwargs['extend'] = 'both'
     kwargs['cmap'] = cmap
-    kwargs['clab'] = 'SST (\N{DEGREE SIGN}C)'
+    kwargs['clab'] = color_label
     pf.plot_pcolormesh(fig, ax, lon, lat, sst_sub.values, **kwargs)
-    ax.set_title(f'{title_label} SST {pd.to_datetime(ymd).strftime("%Y-%m-%d")}', pad=8)
+    ax.set_title(title, pad=8)
 
-    #lease = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/BOEM-Renewable-Energy-Shapefiles_11_2_2022/Wind_Lease_Outlines_11_2_2022.shp'
     lease = glob.glob('/home/coolgroup/bpu/mapdata/shapefiles/BOEM-Renewable-Energy-Shapefiles-current/Wind_Lease_Outlines*.shp')[0]
     kwargs = dict()
     kwargs['edgecolor'] = 'magenta'
     pf.map_add_boem_outlines(ax, lease, **kwargs)
 
-    save_file = f'ruwrf_sst_{domain}_{plot_region}_{ymd}.png'
     plt.savefig(os.path.join(save_dir, save_file), dpi=200)
     plt.close()
 
@@ -112,9 +129,21 @@ if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser(description='Plot WRF SST',
                                          formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    arg_parser.add_argument('ymd',
+    arg_parser.add_argument('-s', '--start',
+                            dest='start',
+                            default='20220801',
                             type=str,
-                            help='Year-month-day to plot in the format YYYYmmdd (e.g. 20220101.')
+                            help='Start Date in format YYYYMMDD. If end date equals start date, a surface map for just'
+                                 'that day is provided. Otherwise a surface map of average SST for the date range'
+                                 'is provided.')
+
+    arg_parser.add_argument('-e', '--end',
+                            dest='end',
+                            default='20220801',
+                            type=str,
+                            help='End Date in format YYYYMMDD. If end date equals start date, a surface map for just'
+                                 'that day is provided. Otherwise a surface map of average SST for the date range'
+                                 'is provided.')
 
     arg_parser.add_argument('-d', '--domain',
                             dest='domain',
