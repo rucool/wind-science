@@ -101,8 +101,8 @@ def main(args):
     os.makedirs(save_dir, exist_ok=True)
 
     for intvl in intervals:
-        sd = intvl[0]
-        ed = intvl[1]
+        sd = pd.to_datetime(intvl[0])
+        ed = pd.to_datetime(intvl[1])
         #sd = dt.datetime(2022, 3, 1, 0, 0)  # for debugging
         #ed = dt.datetime(2022, 3, 1, 0, 0)  # for debugging
         dst = ds.sel(time=slice(sd, ed))
