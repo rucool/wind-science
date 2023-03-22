@@ -111,7 +111,7 @@ def main(args):
     ax.plot(cumsum_power_kw_calc_ctrl_daily.time, cumsum_power_kw_calc_ctrl_daily / 1000000, color='#d95f02', label='Control')  # orange
     ax.plot(cumsum_power_kw_daily.time, cumsum_power_kw_daily / 1000000, color='#7570b3', label='Turbines')  # purple
 
-    ax.set_ylabel('Wind Farm Power (GW)')
+    ax.set_ylabel('Daily Wind Farm Power (GW)')
     ax.set_xlabel('Time (GMT)')
     ax.legend(loc='best', fontsize=10)
 
@@ -122,6 +122,28 @@ def main(args):
     plt.title(title)
 
     save_file = os.path.join(save_dir, f'turbine_vs_control_timeseries_power_daily_{start_str}_{end_str}.png')
+    plt.savefig(save_file, dpi=200)
+    plt.close()
+
+    # plot power - daily barplot
+    fig, ax = plt.subplots(figsize=(13, 7))
+
+    ax.bar(cumsum_power_kw_calc_ctrl_daily.time, cumsum_power_kw_calc_ctrl_daily / 1000000, color='orange',
+           label='Control', width=.9, edgecolor='k')
+    ax.bar(cumsum_power_kw_daily.time, cumsum_power_kw_daily / 1000000, color='cornflowerblue', label='Turbines', alpha=.9,
+           width=.9, edgecolor='k')
+
+    ax.set_ylabel('Daily Wind Farm Power (GW)')
+    ax.set_xlabel('Time (GMT)')
+    ax.legend(loc='best', fontsize=10)
+
+    format_date_axis(ax)
+    # ax.set_ylim([-0.1, 3.1])
+
+    title = f'Simulated Turbines Total Power {overall_sum_gw} GW; Control Total Power {overall_sum_ctrl_gw} GW'
+    plt.title(title)
+
+    save_file = os.path.join(save_dir, f'turbine_vs_control_barplot_power_daily_{start_str}_{end_str}.png')
     plt.savefig(save_file, dpi=200)
     plt.close()
 
