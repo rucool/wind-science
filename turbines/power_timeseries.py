@@ -2,9 +2,9 @@
 
 """
 Author: Lori Garzio on 2/22/2023
-Last modified: 3/14/2023
-Plot timeseries of cumulative wind farm power, average wind speed and direction from RU-WRF simulated turbines vs
-control
+Last modified: 3/22/2023
+Plot timeseries of cumulative wind farm power (hourly and daily), average wind speed and direction from RU-WRF
+simulated turbines vs control
 """
 
 import argparse
@@ -67,6 +67,10 @@ def main(args):
                                    coords=speed_ctrl.coords, dims=speed_ctrl.dims)
     cumsum_power_kw_calc_ctrl = power_calc_ctrl.sum(dim='points')
 
+    # calculate daily cumulative power
+    cumsum_power_kw_daily = cumsum_power_kw.resample(time='D', keep_attrs=True).sum()
+    cumsum_power_kw_calc_ctrl_daily = cumsum_power_kw_calc_ctrl.resample(time='D', keep_attrs=True).sum()
+
     # calculate average wind speed and direction
     speed_avg_ctrl = speed_ctrl.mean(dim='points')
     uavg_ctrl = ds_ctrl.U.mean(dim='points')
@@ -81,7 +85,7 @@ def main(args):
     print(f'Total power: simluated wind farm calculated {overall_sum_calc_gw} GW')
     print(f'Total power: control {overall_sum_ctrl_gw} GW')
 
-    # plot power
+    # plot power - hourly
     fig, ax = plt.subplots(figsize=(13, 7))
 
     ax.plot(cumsum_power_kw_calc_ctrl.time, cumsum_power_kw_calc_ctrl / 1000000, color='#d95f02', label='Control')  # orange
@@ -97,7 +101,27 @@ def main(args):
     title = f'Simulated Turbines Total Power {overall_sum_gw} GW; Control Total Power {overall_sum_ctrl_gw} GW'
     plt.title(title)
 
-    save_file = os.path.join(save_dir, f'turbine_vs_control_timeseries_power_{start_str}_{end_str}.png')
+    save_file = os.path.join(save_dir, f'turbine_vs_control_timeseries_power_hourly_{start_str}_{end_str}.png')
+    plt.savefig(save_file, dpi=200)
+    plt.close()
+
+    # plot power - daily
+    fig, ax = plt.subplots(figsize=(13, 7))
+
+    ax.plot(cumsum_power_kw_calc_ctrl_daily.time, cumsum_power_kw_calc_ctrl_daily / 1000000, color='#d95f02', label='Control')  # orange
+    ax.plot(cumsum_power_kw_daily.time, cumsum_power_kw_daily / 1000000, color='#7570b3', label='Turbines')  # purple
+
+    ax.set_ylabel('Wind Farm Power (GW)')
+    ax.set_xlabel('Time (GMT)')
+    ax.legend(loc='best', fontsize=10)
+
+    format_date_axis(ax)
+    #ax.set_ylim([-0.1, 3.1])
+
+    title = f'Simulated Turbines Total Power {overall_sum_gw} GW; Control Total Power {overall_sum_ctrl_gw} GW'
+    plt.title(title)
+
+    save_file = os.path.join(save_dir, f'turbine_vs_control_timeseries_power_daily_{start_str}_{end_str}.png')
     plt.savefig(save_file, dpi=200)
     plt.close()
 
