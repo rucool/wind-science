@@ -2,7 +2,7 @@
 
 """
 Author: Laura Nazzaro on 1/12/2023 
-Last modified: Laura Nazzaro 1/12/2023
+Last modified: Laura Nazzaro 3/22/2023
 Generate grouped summary statistics and boxplots of windspeed, power, and capacity factor
 """
 
@@ -39,6 +39,11 @@ def main(args):
     bp = args.plot_boxplot
     hm = args.plot_heatmap
     gf = args.grouped_csv
+
+    if len(group)>1:
+        ab=False
+    else:
+        ab=True
 
     winddata = pd.DataFrame()
     powerdata = pd.DataFrame()
@@ -163,7 +168,8 @@ def main(args):
             heatmapFile=heatmapname, \
             csvFile=csvname, \
             ttl=ttl, \
-            max_speed=20)
+            all_black=ab, \
+            max_speed=30)
     
     if 'power' in dvs and len(nturbs)==1:
         dv = 'power'
@@ -183,6 +189,7 @@ def main(args):
             boxplotFile=boxplotname, \
             heatmapFile=heatmapname, \
             csvFile=csvname, \
+            all_black=ab, \
             ttl=ttl)
     
 
