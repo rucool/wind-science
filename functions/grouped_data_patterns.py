@@ -68,10 +68,8 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
         all_vars = group.copy()
         all_vars.append(dv)
         stats = df[all_vars].groupby(group).describe()
-        print(stats)
         if dv=='power':
             sums = df[all_vars].groupby(group).sum()
-            print(sums)
             stats['total'] = sums['power']
         stats.to_csv(csvFile)
     
@@ -138,6 +136,7 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
                 ov+=1
         df = pd.concat([df,ovdf[['order_var','xlabels',dv]]],axis=0,ignore_index=True)
 
+        plt.rcParams.update({'font.size': 12})
         fig, ax = plt.subplots(figsize=(12,7))
         if all_black or len(group)==1:
             df.boxplot(column=dv, by='order_var', ax=ax, notch=True, showmeans=True,

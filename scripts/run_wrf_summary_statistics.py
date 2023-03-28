@@ -120,7 +120,7 @@ def main(args):
             boxplotFile=boxplotname, \
             heatmapFile=heatmapname, \
             csvFile=csvname, \
-            ttl=ttl)
+            ttl=ttl, all_black=False)
     
 
 
