@@ -37,6 +37,8 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
     heat_cmap.set_under('white')
     boxplot_colormap=cm.tab20
     boxplot_colororder=np.append(np.arange(0,20,2),np.arange(1,20,2))
+    boxplot_colorlist=[boxplot_colormap(n) for n in boxplot_colororder]
+    boxplot_colorlist_8=['#7b85d4','#f37738','#83c995','#d7369e','#c4c9d8','#859795','#e9d043','#ad5b50']
     boxplot_hatches=['none','/','x','.','///','xxx','...']
     season_order = ['winter', 'spring', 'summer', 'fall']
     month_order = [12,1,2,3,4,5,6,7,8,9,10,11]   
@@ -86,6 +88,9 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
                 order_vars.append(season_order)
             else:
                 order_vars.append(list(np.unique(df[g])))
+
+        if len(group) > 1 and len(order_vars[1]) <= 8:
+            boxplot_colorlist=boxplot_colorlist_8
         
         ovdf=pd.DataFrame()
         for a in order_vars[0]:
@@ -114,7 +119,7 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
                             i = np.logical_and(ia,np.logical_and(ib,ic))
                             df['order_var'][i]=ov
                             df['xlabels'][i]=xl
-                            ovdf = pd.concat([ovdf,pd.DataFrame({'order_var': [ov], 'xlabels': [xl], dv: [np.nan], 'color': [boxplot_colormap(boxplot_colororder[order_vars[1].index(b)])], 'hatch': [boxplot_hatches[order_vars[2].index(c)]]})], axis=0, ignore_index=True)
+                            ovdf = pd.concat([ovdf,pd.DataFrame({'order_var': [ov], 'xlabels': [xl], dv: [np.nan], 'color': [boxplot_colorlist[order_vars[1].index(b)]], 'hatch': [boxplot_hatches[order_vars[2].index(c)]]})], axis=0, ignore_index=True)
                             xt=np.append(xt,ov)
                             xtl=np.append(xtl,xl)
                             ov+=1
@@ -122,7 +127,7 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
                         i = np.logical_and(ia,ib)
                         df['order_var'][i]=ov
                         df['xlabels'][i]=xl
-                        ovdf = pd.concat([ovdf,pd.DataFrame({'order_var': [ov], 'xlabels': [xl], dv: [np.nan], 'color': [boxplot_colormap(boxplot_colororder[order_vars[1].index(b)])], 'hatch': ['none']})], axis=0, ignore_index=True)
+                        ovdf = pd.concat([ovdf,pd.DataFrame({'order_var': [ov], 'xlabels': [xl], dv: [np.nan], 'color': [boxplot_colorlist[order_vars[1].index(b)]], 'hatch': ['none']})], axis=0, ignore_index=True)
                         xt=np.append(xt,ov)
                         xtl=np.append(xtl,xl)
                         ov+=1
