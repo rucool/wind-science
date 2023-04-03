@@ -58,7 +58,7 @@ if plotISO:
     iso_areas = iso_areas.to_crs(crs={'init': 'epsg:4326'})
 
 #fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection=ccrs.PlateCarree()))
-fig, ax = cplt.create(domain)
+fig, ax = cplt.create(domain) #, coast=coast)
 plt.rcParams.update({'font.size': 14})
 
 # ax.set_extent(domain)  # [min lon, max lon, min lat, max lat]
@@ -124,7 +124,7 @@ if plot9:
     legloc=[-80,46]
 
 if plotWEA:
-    plt.legend(handles=[leasepatch,planpatch], loc=legloc, title=os.path.split(lease)[-1])
+    ax.legend(handles=[leasepatch,planpatch], loc=legloc, title=os.path.split(lease)[-1])
 
 if plot9:
     ax.text(lon9[0,-1]-.1,lat9[0,-1]+.3,'RUWRF 9km',color='blue',horizontalalignment='right',verticalalignment='bottom',fontsize=14, transform=ccrs.PlateCarree(),zorder=20)
