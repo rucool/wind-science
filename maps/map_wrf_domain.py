@@ -13,6 +13,7 @@ import functions.plotting as pf
 import matplotlib.pyplot as plt
 import cool_maps.plot as cplt
 import matplotlib.patches as mpatches
+from matplotlib.lines import Line2D
 
 domainDir = '/home/wrfadmin/toolboxes/wind-science/files'
 weaDir = '/home/coolgroup/bpu/mapdata/shapefiles/BOEM-Renewable-Energy-Shapefiles-current'
@@ -95,6 +96,8 @@ if plotWEA:
     pf.map_add_boem_outlines(ax, plan, **kwargs)
     planpatch = mpatches.Patch(color='green', label='Planning Areas')
     figdesc+='wea_'
+    custom = [Line2D([], [], marker='.', markersize=20, color='magenta', linestyle='None'),
+              Line2D([], [], marker='.', markersize=20, color='green', linestyle='None')]
 if plotISO:
     # this uses geopandas - not supported in wind-science yet
     iso_areas[iso_areas['NAME']=='PJM INTERCONNECTION, LLC'].plot(ax=ax, color='#5D92B1', edgecolor='black', linewidth=.5, zorder=6)
@@ -124,7 +127,7 @@ if plot9:
     legloc=[-80,46]
 
 if plotWEA:
-    ax.legend(handles=[leasepatch,planpatch], loc=legloc, title=os.path.split(lease)[-1])
+    ax.legend(custom, ['Lease Areas', 'Planning Areas'], loc=legloc, title=os.path.split(lease)[-1])
 
 if plot9:
     ax.text(lon9[0,-1]-.1,lat9[0,-1]+.3,'RUWRF 9km',color='blue',horizontalalignment='right',verticalalignment='bottom',fontsize=14, transform=ccrs.PlateCarree(),zorder=20)
