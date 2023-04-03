@@ -12,6 +12,7 @@ import cartopy.feature as cfeature
 import functions.plotting as pf
 import matplotlib.pyplot as plt
 import cool_maps.plot as cplt
+import matplotlib.patches as mpatches
 
 domainDir = '/home/wrfadmin/toolboxes/wind-science/files'
 weaDir = '/home/coolgroup/bpu/mapdata/shapefiles/BOEM-Renewable-Energy-Shapefiles-current'
@@ -87,10 +88,12 @@ if plotWEA:
     kwargs['edgecolor'] = 'magenta'
     kwargs['facecolor'] = 'magenta'
     pf.map_add_boem_outlines(ax, lease, **kwargs)
+    leasepatch = mpatches.Patch(color='magenta', label='Lease Areas')
     kwargs = dict()
     kwargs['edgecolor'] = 'green'
     kwargs['facecolor'] = 'green'
     pf.map_add_boem_outlines(ax, plan, **kwargs)
+    planpatch = mpatches.Patch(color='green', label='Planning Areas')
     figdesc+='wea_'
 if plotISO:
     # this uses geopandas - not supported in wind-science yet
@@ -101,21 +104,28 @@ if plotISO:
     figdesc+='iso_'
 
 lw=1.5
-if plot3:
-    ax.plot(lon3[0,:],lat3[0,:],color='red',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
-    ax.plot(lon3[-1,:],lat3[-1,:],color='red',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
-    ax.plot(lon3[:,0],lat3[:,0],color='red',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
-    ax.plot(lon3[:,-1],lat3[:,-1],color='red',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
-if plot9:
-    ax.plot(lon9[0,:],lat9[0,:],color='blue',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
-    ax.plot(lon9[-1,:],lat9[-1,:],color='blue',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
-    ax.plot(lon9[:,0],lat9[:,0],color='blue',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
-    ax.plot(lon9[:,-1],lat9[:,-1],color='blue',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
 if plot1:
     ax.plot(lon1[0,:],lat1[0,:],color='navy',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
     ax.plot(lon1[-1,:],lat1[-1,:],color='navy',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
     ax.plot(lon1[:,0],lat1[:,0],color='navy',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
     ax.plot(lon1[:,-1],lat1[:,-1],color='navy',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
+    legloc=[-76,41]
+if plot3:
+    ax.plot(lon3[0,:],lat3[0,:],color='red',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
+    ax.plot(lon3[-1,:],lat3[-1,:],color='red',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
+    ax.plot(lon3[:,0],lat3[:,0],color='red',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
+    ax.plot(lon3[:,-1],lat3[:,-1],color='red',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
+    legloc=[-79,42]
+if plot9:
+    ax.plot(lon9[0,:],lat9[0,:],color='blue',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
+    ax.plot(lon9[-1,:],lat9[-1,:],color='blue',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
+    ax.plot(lon9[:,0],lat9[:,0],color='blue',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
+    ax.plot(lon9[:,-1],lat9[:,-1],color='blue',linewidth=lw, transform=ccrs.PlateCarree(),zorder=20)
+    legloc=[-80,46]
+
+if plotWEA:
+    plt.legend(handles=[leasepatch,planpatch], loc=legloc, title=os.path.split(lease)[-1])
+
 if plot9:
     ax.text(lon9[0,-1]-.1,lat9[0,-1]+.3,'RUWRF 9km',color='blue',horizontalalignment='right',verticalalignment='bottom',fontsize=14, transform=ccrs.PlateCarree(),zorder=20)
     figdesc+='9km_'
