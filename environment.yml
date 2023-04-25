@@ -15,5 +15,5 @@ dependencies:
   - wrf-python==1.3.4.1
   - pynio==1.5.5
   - erddapy==1.2.1
-  - cool_maps==0.0.8
+  - cool_maps==0.0.9
   - windrose==1.8.0
