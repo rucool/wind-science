@@ -124,7 +124,7 @@ if plot9:
     legloc=[-80,46]
 
 if plotWEA:
-    ax.legend(handles=[leasepatch,planpatch], loc=legloc, fontsize=8, title=os.path.split(lease)[-1], title_fontsize=8).set_zorder(25)
+    ax.legend(handles=[leasepatch,planpatch], loc=legloc, fontsize=8, title=os.path.split(lease)[-1], title_fontsize=8).set_zorder(50)
 
 if plot9:
     ax.text(lon9[0,-1]-.1,lat9[0,-1]+.3,'RUWRF 9km',color='blue',horizontalalignment='right',verticalalignment='bottom',fontsize=14, transform=ccrs.PlateCarree(),zorder=20)
