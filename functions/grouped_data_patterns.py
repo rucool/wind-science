@@ -13,6 +13,7 @@ import pandas as pd
 import matplotlib as mpl
 from matplotlib import cm
 import matplotlib.pyplot as plt
+import calendar
 plt.rcParams.update({'font.size': 12})
 pd.set_option('display.width', 320, "display.max_columns", 15)  # for display in pycharm console
 
@@ -21,7 +22,7 @@ pd.set_option('display.width', 320, "display.max_columns", 15)  # for display in
 # boxplots: speed, capacity factor w/ power (https://www.python-graph-gallery.com/line-chart-dual-y-axis-with-matplotlib)
 # heatmap: way to show amount of data at top and bottom (https://stackoverflow.com/questions/71417866/get-information-from-plt-hexbin)
 
-def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapFile=None, csvFile=None, ttl=None, max_speed=40, all_black=True):
+def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapFile=None, csvFile=None, ttl=None, max_speed=40, all_black=False):
     # define units
     unit_labels = dict(speed='m/s',power='kW',capacity_factor=' ')
     if max_power>50000:
@@ -51,6 +52,13 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
     t1=max(df['time']).strftime('%Y-%m-%d %H:%M')
     if not ttl:
         ttl = f'{t0} to {t1}'   
+
+    shortnames={'upwelling': {'upwelling NA': 'upw-NA', 'upwelling absent': 'upw-N', 'upwelling present': 'upw-Y'},
+        'turbines': {'wind farm': 'WF', 'control': 'ctrl'},
+        'season': {'winter': 'Win', 'spring': 'Spr', 'summer': 'Sum', 'fall': 'Aut'}}
+    shortlabels=False
+    if len(group)>1:
+        shortlabels=True
 
     if (boxplotFile or csvFile) and group:
         df['order_var'] = np.nan
@@ -95,9 +103,19 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
         ovdf=pd.DataFrame()
         for a in order_vars[0]:
             ia = df[group[0]]==a
-            xl = str(a)
+            alabel = str(a)
+            if group[0]=='month':
+                alabel = calendar.month_abbr[a]
+            if shortlabels and group[0] in shortnames.keys():
+                alabel = shortnames[group[0]][a]
+            xl = alabel
             if len(group) > 1:
                 for b in order_vars[1]:
+                    blabel = str(b)
+                    if group[1]=='month':
+                        blabel = calendar.month_abbr[b]
+                    if shortlabels and group[1] in shortnames.keys():
+                        blabel = shortnames[group[1]][b]
                     if b==order_vars[1][0] and a != order_vars[0][0]:
                         xl=' '
                         ovdf = pd.concat([ovdf,pd.DataFrame({'order_var': [ov], 'xlabels': [xl], dv: [np.nan], 'color': [' '], 'hatch': [' ']})], axis=0, ignore_index=True)
@@ -105,9 +123,14 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
                         xtl=np.append(xtl,xl)
                         ov+=1
                     ib = df[group[1]]==b
-                    xl = ' '.join([str(a),str(b)])
+                    xl = ', '.join([alabel,blabel])
                     if len(group) > 2:
                         for c in order_vars[2]:
+                            clabel = str(c)
+                            if group[2]=='month':
+                                clabel = calendar.month_abbr[c]
+                            if shortlabels and group[2] in shortnames.keys():
+                                clabel = shortnames[group[2]][c]
                             if c==order_vars[2][0] and a != order_vars[0][0]:
                                 xl=' '
                                 ovdf = pd.concat([ovdf,pd.DataFrame({'order_var': [ov], 'xlabels': [xl], dv: [np.nan], 'color': [' '], 'hatch': [' ']})], axis=0, ignore_index=True)
@@ -115,7 +138,7 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
                                 xtl=np.append(xtl,xl)
                                 ov+=1
                             ic = df[group[2]]==c
-                            xl = ' '.join([str(a),str(b),str(c)])
+                            xl = ', '.join([alabel,blabel,clabel])
                             i = np.logical_and(ia,np.logical_and(ib,ic))
                             df['order_var'][i]=ov
                             df['xlabels'][i]=xl
@@ -142,7 +165,7 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
         df = pd.concat([df,ovdf[['order_var','xlabels',dv]]],axis=0,ignore_index=True)
 
         plt.rcParams.update({'font.size': 12})
-        fig, ax = plt.subplots(figsize=(12,7))
+        fig, ax = plt.subplots(figsize=(12,8))
         if all_black or len(group)==1:
             df.boxplot(column=dv, by='order_var', ax=ax, notch=True, showmeans=True,
                                 boxprops=dict(linewidth=1.25),

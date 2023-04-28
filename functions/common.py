@@ -2,6 +2,7 @@
 
 import logging
 import numpy as np
+import pandas as pd
 
 
 def daterange_interval(interval, time_array):
@@ -65,3 +66,25 @@ def wind_uv_to_spd(u, v):
     wspd = np.sqrt(np.square(u) + np.square(v))
 
     return wspd
+
+
+def assign_upwelling(data, upwelling_file, satellite):
+    """
+    Assigns satellite-based upwelling to pandas dataframe
+    data: pandas dataframe with 'time' column
+    upwelling_file: name of csv file containing upwelling 
+        (columns: Month, Day, Year, and column matching 'satellite' argument with 1=upwelling 0=no upwelling)
+    satellite: name of column in upwelling_file that defines upwelling yes/no
+    """
+
+    upwelling = pd.read_csv(upwelling_file)
+    upwelling['date'] = pd.to_datetime(upwelling['Year'].astype(str)+'-'+upwelling['Month']+'-'+upwelling['Day'].astype(str))
+    data['date'] = pd.to_datetime(data['time'].dt.date)
+    upwelling = upwelling[['date',satellite]]
+    data = pd.merge(data, upwelling, on='date', how='left')
+    data['upwelling'] = 'upwelling NA'
+    data['upwelling'][data[satellite]==1] = 'upwelling present'
+    data['upwelling'][data[satellite]==0] = 'upwelling absent'
+    data=data.drop(columns=['date',satellite])
+
+    return data

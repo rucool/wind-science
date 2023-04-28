@@ -14,18 +14,9 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from functions import grouped_data_patterns as summary
+from functions.common import wind_uv_to_spd
 
 
-def wind_uv_to_spd(u, v):
-    """
-    Calculates the wind speed from the u and v wind components
-    :param u: west/east direction (wind from the west is positive, from the east is negative)
-    :param v: south/noth direction (wind from the south is positive, from the north is negative)
-    :returns wspd: wind speed calculated from the u and v wind components
-    """
-    wspd = np.sqrt(np.square(u) + np.square(v))
-
-    return wspd
 
 def main(args):
     t1 = args.end
