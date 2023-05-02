@@ -23,7 +23,8 @@ def add_contours(ax, londata, latdata, vardata, clist, label_format=None):
     ax.clabel(CS, inline=True, fontsize=10.5, fmt=label_format)
 
 
-def map_add_boem_outlines(ax, shpfile, edgecolor=None, facecolor=None, projection=None, zorder=None, alpha=None):
+def map_add_boem_outlines(ax, shpfile, edgecolor=None, facecolor=None, projection=None, zorder=None, alpha=None,
+                          linewidth=1):
     edgecolor = edgecolor or 'black'
     facecolor = facecolor or 'none'
     projection = projection or ccrs.PlateCarree()
@@ -34,7 +35,8 @@ def map_add_boem_outlines(ax, shpfile, edgecolor=None, facecolor=None, projectio
         Reader(shpfile).geometries(),
         projection,
         edgecolor=edgecolor,
-        facecolor=facecolor
+        facecolor=facecolor,
+        linewidth=linewidth
         )
 
     ax.add_feature(shape_feature, zorder=zorder, alpha=alpha)

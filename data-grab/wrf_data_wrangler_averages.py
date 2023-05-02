@@ -72,7 +72,7 @@ def main(args):
             "data_vars": dict()
         }
 
-        variables = ['ws_monthly_avg', 'rms']
+        variables = ['ws_monthly_avg', 'rms_monthly']
         for v in variables:
             data["data_vars"][v] = dict()
             data["data_vars"][v]["data"] = np.empty((len(months), np.shape(ds.XLAT)[0], np.shape(ds.XLAT)[1]), dtype='float32')
@@ -109,8 +109,8 @@ def main(args):
             rms = np.sqrt((u_month_variance + v_month_variance))
 
             # append variance to data dictionary
-            data["data_vars"]['rms']['data'][i] = rms
-            data["data_vars"]['rms']["attrs"]["comment"] = f'Measure of variance for wind speed for each month for ' \
+            data["data_vars"]['rms_monthly']['data'][i] = rms
+            data["data_vars"]['rms_monthly']["attrs"]["comment"] = f'Measure of variance for wind speed for each month for ' \
                                                            f'years: {years}, calculated as sqrt(u_variance + v_variance)'
 
         outds = xr.Dataset.from_dict(data)
