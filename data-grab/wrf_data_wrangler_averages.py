@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 4/25/2023
-Last modified: Lori Garzio 4/25/2023
+Last modified: Lori Garzio 5/2/2023
 Grab U and V data from THREDDS for a user-defined time-range and height, calculate monthly averages and variance
 and export as NetCDF.
 """
@@ -101,7 +101,7 @@ def main(args):
             data["data_vars"]['ws_monthly_avg']['data'][i] = ws_monthly
             data["data_vars"]['ws_monthly_avg']["attrs"]["units"] = 'm s-1'
             data["data_vars"]['ws_monthly_avg']["attrs"]["long_name"] = 'Monthly averaged wind speed'
-            data["data_vars"]['ws_monthly_avg']["attrs"]["comment"] = 'Average of wind speeds for each month for multiple years'
+            data["data_vars"]['ws_monthly_avg']["attrs"]["comment"] = f'Average of wind speeds for each month for years: {years}'
 
             # calculate monthly rms
             u_month_variance = u_month.var(dim='time')
@@ -110,7 +110,8 @@ def main(args):
 
             # append variance to data dictionary
             data["data_vars"]['rms']['data'][i] = rms
-            data["data_vars"]['ws_monthly_avg']["attrs"]["comment"] = 'Measure of variance for wind speed for each month for multiple years, calculated as sqrt(u_variance + v_variance)'
+            data["data_vars"]['rms']["attrs"]["comment"] = f'Measure of variance for wind speed for each month for ' \
+                                                           f'years: {years}, calculated as sqrt(u_variance + v_variance)'
 
         outds = xr.Dataset.from_dict(data)
 
