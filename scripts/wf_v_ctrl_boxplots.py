@@ -14,18 +14,9 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from functions import grouped_data_patterns as summary
+from functions.common import wind_uv_to_spd
+from functions.common import assign_upwelling
 
-
-def wind_uv_to_spd(u, v):
-    """
-    Calculates the wind speed from the u and v wind components
-    :param u: west/east direction (wind from the west is positive, from the east is negative)
-    :param v: south/noth direction (wind from the south is positive, from the north is negative)
-    :returns wspd: wind speed calculated from the u and v wind components
-    """
-    wspd = np.sqrt(np.square(u) + np.square(v))
-
-    return wspd
 
 def main(args):
     t1 = args.end
@@ -39,6 +30,8 @@ def main(args):
     bp = args.plot_boxplot
     hm = args.plot_heatmap
     gf = args.grouped_csv
+    upwelling_file = args.upwelling_file
+    upwelling_source = args.upwelling_source
 
     if len(group)>1:
         ab=False
@@ -122,6 +115,10 @@ def main(args):
         powerdata.loc[np.logical_and(powerdata['month']>=3,powerdata['month']<=5), 'season'] = 'spring'
         powerdata.loc[np.logical_and(powerdata['month']>=6,powerdata['month']<=8), 'season'] = 'summer'
         powerdata.loc[np.logical_and(powerdata['month']>=9,powerdata['month']<=11), 'season'] = 'fall'
+
+    if 'upwelling' in group:
+        winddata = assign_upwelling(winddata, upwelling_file, upwelling_source)
+        powerdata = assign_upwelling(powerdata, upwelling_file, upwelling_source)
 
     # all_leases = '_'.join(list(np.unique(data['lease_code'])))
     # all_heights = '_'.join(list(np.unique(data['height']).astype(str)))
@@ -233,6 +230,18 @@ if __name__ == '__main__':
                             default=None,
                             type=str,
                             help='File containing power curve')
+    
+    arg_parser.add_argument('-uf', '--upwelling_file',
+                            dest='upwelling_file',
+                            default='NJUpwellingforBPU.csv',
+                            type=str,
+                            help='File containing upwelling and non-upwelling dates')
+    
+    arg_parser.add_argument('-us', '--upwelling_source',
+                            dest='upwelling_source',
+                            default='AVHRR',
+                            type=str,
+                            help='Source used to determine upwelling (must be column of 0s and 1s in upwelling_file)')
     
     arg_parser.add_argument('-g', '--groups',
                             dest='groups',
