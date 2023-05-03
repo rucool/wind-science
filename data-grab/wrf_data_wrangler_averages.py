@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 4/25/2023
-Last modified: Lori Garzio 5/2/2023
+Last modified: Lori Garzio 5/3/2023
 Grab U and V data from THREDDS for a user-defined time-range and height, calculate monthly averages and variance
 and export as NetCDF.
 """
@@ -34,6 +34,10 @@ def main(args):
         mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
     elif domain == '9km':
         mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_9km_processed/WRF_4.1_9km_Processed_Dataset_Best'
+    elif domain == '1km_wf2km':
+        mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_1km_wf2km_processed/WRF_4.1_1km_with_Wind_Farm_Processed_Dataset_Best'
+    elif domain == '1km_ctrl':
+        mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_1km_ctrl_processed/WRF_4.1_1km_Control_Processed_Dataset_Best'
     else:
         raise ValueError('Invalid domain specified')
 
@@ -72,7 +76,7 @@ def main(args):
             "data_vars": dict()
         }
 
-        variables = ['ws_monthly_avg', 'rms_monthly']
+        variables = ['ws_monthly_avg', 'ws_monthly_variance']
         for v in variables:
             data["data_vars"][v] = dict()
             data["data_vars"][v]["data"] = np.empty((len(months), np.shape(ds.XLAT)[0], np.shape(ds.XLAT)[1]), dtype='float32')
@@ -100,18 +104,27 @@ def main(args):
             # append monthly-averaged data to data dictionary
             data["data_vars"]['ws_monthly_avg']['data'][i] = ws_monthly
             data["data_vars"]['ws_monthly_avg']["attrs"]["units"] = 'm s-1'
-            data["data_vars"]['ws_monthly_avg']["attrs"]["long_name"] = 'Monthly averaged wind speed'
-            data["data_vars"]['ws_monthly_avg']["attrs"]["comment"] = f'Average of wind speeds for each month for years: {years}'
+            data["data_vars"]['ws_monthly_avg']["attrs"]["long_name"] = 'Monthly Averaged Wind Speed'
+            data["data_vars"]['ws_monthly_avg']["attrs"]["comment"] = f'Average of wind speeds for each month for ' \
+                                                                      f'years: {years}'
 
-            # calculate monthly rms
-            u_month_variance = u_month.var(dim='time')
-            v_month_variance = v_month.var(dim='time')
-            rms = np.sqrt((u_month_variance + v_month_variance))
+            # # calculate monthly variance (taking wind speed magnitude and direction into account)
+            # u_month_variance = u_month.var(dim='time')
+            # v_month_variance = v_month.var(dim='time')
+            # rms = np.sqrt((u_month_variance + v_month_variance))
+            #
+            # # append variance to data dictionary
+            # data["data_vars"]['rms_monthly']['data'][i] = rms
+            # data["data_vars"]['rms_monthly']["attrs"]["comment"] = f'Measure of variance for wind speed for each month for ' \
+            #                                                f'years: {years}, calculated as sqrt(u_variance + v_variance)'
+            #
+            # calculate monthly variance (just wind speed magnitude)
+            ws_monthly_variance = ws_month.var(dim='time')
 
             # append variance to data dictionary
-            data["data_vars"]['rms_monthly']['data'][i] = rms
-            data["data_vars"]['rms_monthly']["attrs"]["comment"] = f'Measure of variance for wind speed for each month for ' \
-                                                           f'years: {years}, calculated as sqrt(u_variance + v_variance)'
+            data["data_vars"]['ws_monthly_variance']['data'][i] = ws_monthly_variance
+            data["data_vars"]['ws_monthly_variance']["attrs"]["comment"] = f'Variance of wind speed magnitude for each ' \
+                                                                           f'month for years: {years}'
 
         outds = xr.Dataset.from_dict(data)
 
