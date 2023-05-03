@@ -190,7 +190,8 @@ if __name__ == '__main__':
                             default='3km',
                             type=str,
                             choices=['3km', '9km', '1km_wf2km', '1km_ctrl'],
-                            help='Domain: operational 3km or 9km WRF domain')
+                            help='Domain: operational 3km or 9km WRF domain, 1km with simulated windfarm (1km_wf2km), ' \
+                                 '1km without simulated windfarm (1km_ctrl)')
 
     arg_parser.add_argument('-save_dir',
                             default='/home/coolgroup/bpu/wrf/data/wrf_nc/averages',
