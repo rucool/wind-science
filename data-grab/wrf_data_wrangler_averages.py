@@ -117,7 +117,7 @@ def main(args):
             # data["data_vars"]['rms_monthly']['data'][i] = rms
             # data["data_vars"]['rms_monthly']["attrs"]["comment"] = f'Measure of variance for wind speed for each month for ' \
             #                                                f'years: {years}, calculated as sqrt(u_variance + v_variance)'
-            #
+
             # calculate monthly variance (just wind speed magnitude)
             ws_monthly_variance = ws_month.var(dim='time')
 
@@ -189,7 +189,7 @@ if __name__ == '__main__':
                             dest='domain',
                             default='3km',
                             type=str,
-                            choices=['3km', '9km'],
+                            choices=['3km', '9km', '1km_wf2km', '1km_ctrl'],
                             help='Domain: operational 3km or 9km WRF domain')
 
     arg_parser.add_argument('-save_dir',
