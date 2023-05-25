@@ -47,13 +47,42 @@ def wind_uv_to_dir(u, v):
     Calculates the wind direction from the u and v component of wind.
     Takes into account the wind direction coordinates is different than the
     trig unit circle coordinate. If the wind direction is 360 then returns zero
-    (by %360)
+    (by %360). Returns direction wind is coming FROM.
     Inputs:
     u = west/east direction (wind from the west is positive, from the east is negative)
     v = south/noth direction (wind from the south is positive, from the north is negative)
     """
     wdir = (270-np.rad2deg(np.arctan2(v, u))) % 360
     return wdir
+
+
+def wind_dir_to_quadrant(wdir):
+    """
+    Determine directional quadrant the wind is coming from.
+    Takes wind direction in degrees (0-360) and outputs quadrant:
+        NE: 0-90 degrees, SE: 90-180 degrees, SW: 180-270 degrees, NW: 270-360 degrees
+    Includes minimum limit (degree) of quadrant up to but not including maximum limit
+    """
+    wquadrant = np.array(['NA']*len(wdir))
+    wquadrant[np.logical_and(wdir>=0,wdir<90)]='NE'
+    wquadrant[np.logical_and(wdir>=90,wdir<180)]='SE'
+    wquadrant[np.logical_and(wdir>=180,wdir<270)]='SW'
+    wquadrant[np.logical_and(wdir>=270,wdir<360)]='NW'
+
+    return wquadrant
+
+
+def get_predominant_quadrant(wquadrant):
+    """
+    Determine predominant quadrant the wind is coming from.
+    Takes array of wind quadrants and returns the one most frequently seen, plus percent of time it was observed.
+    """
+    quadrant_counts = wquadrant.value_counts()
+    max_index = quadrant_counts.argmax()
+    predominant_quadrant = quadrant_counts.keys()[max_index]
+    predominant_quadrant_percent = quadrant_counts[max_index]/len(wquadrant)*100
+
+    return predominant_quadrant, predominant_quadrant_percent
 
 
 def wind_uv_to_spd(u, v):

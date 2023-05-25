@@ -2,7 +2,7 @@
 
 """
 Author: Laura Nazzaro on 1/12/2023 
-Last modified: Laura Nazzaro 3/22/2023
+Last modified: Laura Nazzaro 5/8/2023
 Generate grouped summary statistics and boxplots of windspeed, power, and capacity factor
 """
 
@@ -22,7 +22,11 @@ pd.set_option('display.width', 320, "display.max_columns", 15)  # for display in
 # boxplots: speed, capacity factor w/ power (https://www.python-graph-gallery.com/line-chart-dual-y-axis-with-matplotlib)
 # heatmap: way to show amount of data at top and bottom (https://stackoverflow.com/questions/71417866/get-information-from-plt-hexbin)
 
-def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapFile=None, csvFile=None, ttl=None, max_speed=40, all_black=False):
+def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapFile=None, csvFile=None, ttl=None, max_speed=40, all_black=False, returnbpax=False, returnhmax=False):
+    if (returnbpax and (heatmapFile or returnhmax)) or (returnhmax and (boxplotFile or returnbpax)):
+        print('if returning figure axis, can only plot boxplot or heatmap. please choose one or run script for each separately.')
+        return 0
+    
     # define units
     unit_labels = dict(speed='m/s',power='kW',capacity_factor=' ')
     if max_power>50000:
@@ -60,7 +64,7 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
     if len(group)>1:
         shortlabels=True
 
-    if (boxplotFile or csvFile) and group:
+    if (boxplotFile or returnbpax or csvFile) and group:
         df['order_var'] = np.nan
         df['xlabels'] = np.nan
         ov=1
@@ -87,7 +91,7 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
     df.loc[df['month']==12, 'doy'] -= 365
     df.loc[df['month']==12, 'year'] += 1
 
-    if boxplotFile and group:
+    if (boxplotFile or returnbpax) and group:
         order_vars = []
         for g in group:
             if g=='month':
@@ -166,13 +170,16 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
 
         plt.rcParams.update({'font.size': 12})
         fig, ax = plt.subplots(figsize=(12,8))
+        mean_size=15
+        if np.max(ovdf['order_var'])>20:
+            mean_size=8
         if all_black or len(group)==1:
-            df.boxplot(column=dv, by='order_var', ax=ax, notch=True, showmeans=True,
+            box = df.boxplot(column=dv, by='order_var', ax=ax, notch=True, showmeans=True,
                                 boxprops=dict(linewidth=1.25),
                                 whiskerprops=dict(linewidth=1.25),
                                 medianprops=dict(linewidth=5,color='black'),
                                 flierprops=dict(marker='x'),
-                                meanprops=dict(marker='^', markeredgecolor='black', markerfacecolor='black', markersize=15))
+                                meanprops=dict(marker='^', markeredgecolor='black', markerfacecolor='black', markersize=mean_size))
         else:
             box = df.boxplot(column=dv, by='order_var', ax=ax, patch_artist=True, return_type='both', \
                                 notch=True, showmeans=True,
@@ -180,7 +187,7 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
                                 whiskerprops=dict(linewidth=1.25),
                                 medianprops=dict(linewidth=5,color='black'),
                                 flierprops=dict(marker='x'),
-                                meanprops=dict(marker='^', markeredgecolor='black', markerfacecolor='black', markersize=15))
+                                meanprops=dict(marker='^', markeredgecolor='black', markerfacecolor='black', markersize=mean_size))
             #for boxid, color in zip(box['boxes'], ovdf['color']):
             for row_key, (ax,row) in box.iteritems():
                 for i,boxid in enumerate(row['boxes']):
@@ -188,6 +195,7 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
                         boxid.set_facecolor(ovdf['color'][i])
                     if ovdf['hatch'][i] not in ['',' ','none']:
                         boxid.set_hatch(ovdf['hatch'][i])
+        plt.grid(False)
         plt.xticks(xt,xtl)
         plt.xticks(rotation=45, ha='right')
         plt.xlabel(None)
@@ -210,10 +218,14 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
         plt.title('')
         plt.suptitle('')
         ax.set_title(ttl)
-        plt.savefig(boxplotFile, dpi=300)
-        plt.close()
+        if boxplotFile:
+            plt.savefig(boxplotFile, dpi=300)
+        if returnbpax:
+            return  fig, ax, box, boxplotFile, ovdf
+        else:
+            plt.close()
 
-    if heatmapFile:
+    if heatmapFile or returnhmax:
         plt.rcParams.update({'font.size': 24}) 
         doy_ticks = pd.DataFrame(np.append(12,range(1,12)),columns=['month'])
         doy_ticks['day'] = 15
@@ -271,5 +283,9 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
             axb.ylim([-max_power*axis_extend,max_power*(1+axis_extend)])
             axb.ylabel('power (' + unit_labels['power'] + ')')
         plt.title(ttl)
-        plt.savefig(heatmapFile, dpi=300)
-        plt.close()
+        if heatmapFile:
+            plt.savefig(heatmapFile, dpi=300)
+        if returnhmax:
+            return fig, ax, heatmapFile, hexcoll
+        else:
+            plt.close()

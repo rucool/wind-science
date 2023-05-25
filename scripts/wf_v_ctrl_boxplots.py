@@ -14,8 +14,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from functions import grouped_data_patterns as summary
-from functions.common import wind_uv_to_spd
-from functions.common import assign_upwelling
+from functions.common import wind_uv_to_spd, wind_uv_to_dir, wind_dir_to_quadrant, get_predominant_quadrant, assign_upwelling
 
 
 def main(args):
@@ -93,9 +92,31 @@ def main(args):
         
     
     winddata['speed'] = wind_uv_to_spd(winddata['U'], winddata['V'])
+    winddata['dir'] = wind_uv_to_dir(winddata['U'], winddata['V'])
+    winddata['quadrant'] = wind_dir_to_quadrant(winddata['dir'])
+    winddata['winddir'] = 'NA'
+    winddata['ctrldir'] = 'NA'
+    winddata['wfdir'] = 'NA'
+    powerdata['winddir'] = 'NA'
+    powerdata['ctrldir'] = 'NA'
+    powerdata['wfdir'] = 'NA'
+    for t in np.unique(winddata['time']):
+        wfdir, wfp = get_predominant_quadrant(winddata['quadrant'][np.logical_and(winddata['time']==t,winddata['turbines']=='wind farm')])
+        ctrldir, ctrlp = get_predominant_quadrant(winddata['quadrant'][np.logical_and(winddata['time']==t,winddata['turbines']=='control')])
+        if wfp >= 75:
+            winddata['winddir'][np.logical_and(winddata['time']==t,winddata['turbines']=='wind farm')] = wfdir
+            powerdata['winddir'][np.logical_and(powerdata['time']==t,powerdata['turbines']=='wind farm')] = wfdir
+            winddata['wfdir'][winddata['time']==t] = wfdir
+            powerdata['wfdir'][powerdata['time']==t] = wfdir
+        if ctrlp >= 75:
+            winddata['winddir'][np.logical_and(winddata['time']==t,winddata['turbines']=='control')] = ctrldir
+            powerdata['winddir'][np.logical_and(powerdata['time']==t,powerdata['turbines']=='control')] = ctrldir
+            winddata['ctrldir'][winddata['time']==t] = ctrldir
+            powerdata['ctrldir'][powerdata['time']==t] = ctrldir
     # data['time']=pd.to_datetime(data.index)
     winddata['year'] = winddata['time'].dt.year
     winddata['month'] = winddata['time'].dt.month
+    winddata['hour'] = winddata['time'].dt.hour
     winddata['season'] = np.nan
     winddata.loc[winddata['month']==12, 'season'] = 'winter'
     winddata.loc[winddata['month']<=2, 'season'] = 'winter'
@@ -109,6 +130,7 @@ def main(args):
         powerdata['capacity_factor'] = powerdata['power'] / max_power
         powerdata['year'] = powerdata['time'].dt.year
         powerdata['month'] = powerdata['time'].dt.month
+        powerdata['hour'] = powerdata['time'].dt.hour
         powerdata['season'] = np.nan
         powerdata.loc[powerdata['month']==12, 'season'] = 'winter'
         powerdata.loc[powerdata['month']<=2, 'season'] = 'winter'
