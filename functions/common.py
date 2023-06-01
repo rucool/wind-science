@@ -42,6 +42,23 @@ def setup_logger(name, loglevel, logfile):
     return logger
 
 
+def subset_wrf_grid(extent, data):
+    lonx = data.XLONG
+    laty = data.XLAT
+
+    lon_idx = np.logical_and(lonx > extent[0], lonx < extent[1])
+    lat_idx = np.logical_and(laty > extent[2], laty < extent[3])
+
+    # find i and j indices of lon/lat in boundaries
+    ind = np.where(np.logical_and(lat_idx, lon_idx))
+
+    # subset data from min i,j corner to max i,j corner
+    # there will be some points outside of defined boundaries because grid is not rectangular
+    data_sub = np.squeeze(data)[range(np.min(ind[0]), np.max(ind[0]) + 1), range(np.min(ind[1]), np.max(ind[1]) + 1)]
+
+    return data_sub, data_sub.XLONG, data_sub.XLAT
+
+
 def wind_uv_to_dir(u, v):
     """
     Calculates the wind direction from the u and v component of wind.
