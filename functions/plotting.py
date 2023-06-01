@@ -41,6 +41,8 @@ def map_add_boem_outlines(ax, shpfile, edgecolor=None, facecolor=None, projectio
 
     ax.add_feature(shape_feature, zorder=zorder, alpha=alpha)
 
+    return shape_feature._geoms
+
 
 def plot_contourf(fig, ax, x, y, c, cmap, levels=None, ttl=None, clab=None, cbar_ticks=None, extend='both',
                   shift_subplot_right=0.88, xlab=None, ylab=None, yticks=None):
