@@ -134,7 +134,7 @@ if __name__ == '__main__':
 
     arg_parser.add_argument('-e', '--end',
                             dest='end_str',
-                            default='20230228',
+                            default='20221031',
                             type=str,
                             help='End Date in format YYYYMMDD')
 
@@ -148,7 +148,7 @@ if __name__ == '__main__':
 
     arg_parser.add_argument('-d', '--domain',
                             dest='domain',
-                            default='3km',
+                            default='1km_wf2km',
                             type=str,
                             choices=['1km_wf2km', '1km_ctrl'],
                             help='Research 1km with simulated windfarm: 1km_wf2km,'
