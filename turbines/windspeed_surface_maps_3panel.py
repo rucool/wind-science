@@ -211,14 +211,17 @@ if __name__ == '__main__':
                             help='list of heights to plot')
 
     arg_parser.add_argument('-ws_min',
+                            type=float,
                             default=3,
                             help='minimum colorbar limit for windspeed plots')
 
     arg_parser.add_argument('-ws_max',
+                            type=float,
                             default=11,
                             help='maximum colorbar limit for windspeed plots')
 
     arg_parser.add_argument('-ws_interval',
+                            type=float,
                             default=.5,
                             help='interval for colorbar for windspeed plots')
 
