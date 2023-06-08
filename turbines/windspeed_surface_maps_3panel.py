@@ -199,7 +199,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('-expt',
                             type=str,
                             default='1km_wf2km',
-                            choices=['1km_wf2km' '1km_wf2km_nyb'],
+                            choices=['1km_wf2km', '1km_wf2km_nyb'],
                             help='Experiment version to plot against the control')
 
     arg_parser.add_argument('-heights',
