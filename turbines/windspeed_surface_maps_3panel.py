@@ -25,7 +25,9 @@ def main(args):
     ymd = args.ymd
     expt = args.expt
     heights = args.heights
-    ws_lims = args.ws_lims
+    ws_min = args.ws_min
+    ws_max = args.ws_max
+    ws_interval = args.ws_interval
     save_dir = args.save_dir
 
     turb_csv_dir = '/home/wrfadmin/toolboxes/wind-science/files'
@@ -133,7 +135,7 @@ def main(args):
 
             # set color maps and labels
             cmap_ws = plt.get_cmap('BuPu')
-            levels_ws = list(np.arange(ws_lims[0], ws_lims[1], ws_lims[2]))
+            levels_ws = list(np.arange(ws_min, ws_max + ws_interval, ws_interval))
             color_label_ws = 'Wind Speed (m/s)'
 
             cmap_diff = plt.get_cmap('RdBu_r')
@@ -208,10 +210,17 @@ if __name__ == '__main__':
                             choices=[[160], [10, 160]],
                             help='list of heights to plot')
 
-    arg_parser.add_argument('-ws_lims',
-                            type=list,
-                            default=[3, 11.5, .5],
-                            help='list of [minimum, maximum, interval] colorbar limits for windspeed plots')
+    arg_parser.add_argument('-ws_min',
+                            default=3,
+                            help='minimum colorbar limit for windspeed plots')
+
+    arg_parser.add_argument('-ws_max',
+                            default=11,
+                            help='maximum colorbar limit for windspeed plots')
+
+    arg_parser.add_argument('-ws_interval',
+                            default=.5,
+                            help='interval for colorbar for windspeed plots')
 
     arg_parser.add_argument('-save_dir',
                             default='/www/web/rucool/windenergy/ru-wrf/windturbs/plots',
