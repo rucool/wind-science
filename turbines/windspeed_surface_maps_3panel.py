@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 3/3/2023
-Last modified: 3/14/2023
+Last modified: 6/8/2023
 Creates a 3-panel plot with surface maps of instantaneous windspeed with and without turbines, and differences
 """
 
@@ -23,24 +23,36 @@ plt.rcParams.update({'font.size': 12})  # all font sizes are 12 unless otherwise
 
 def main(args):
     ymd = args.ymd
+    expt = args.expt
     heights = args.heights
     ws_lims = args.ws_lims
     save_dir = args.save_dir
 
-    turb_csv = pd.read_csv('/home/wrfadmin/toolboxes/wind-science/files/turbine_locations_final.csv')
+    turb_csv_dir = '/home/wrfadmin/toolboxes/wind-science/files'
     power_curve = pd.read_csv('/home/wrfadmin/toolboxes/wind-science/files/wrf_lw15mw_power.csv')
     file_dir = '/home/coolgroup/ru-wrf/real-time/v4.1_parallel/processed_windturbs'
 
     yr = pd.to_datetime(ymd).year
     ym = ymd[0:6]
 
-    save_dir = os.path.join(save_dir, 'surface_maps_3panel', str(yr), ym, ymd)
+    plt_region = pf.plot_regions()
+    if expt == '1km_wf2km':
+        extent = plt_region['windturb']['extent']
+        turb_csv = pd.read_csv(os.path.join(turb_csv_dir, 'turbine_locations_final.csv'))
+        savestr = 'surface_maps_3panel'
+        qs = 5
+    elif expt == '1km_wf2km_nyb':
+        extent = plt_region['windturb_nyb']['extent']
+        turb_csv = pd.read_csv(os.path.join(turb_csv_dir, 'turbine_locations_final_nyb.csv'))
+        savestr = 'surface_maps_3panel_nyb'
+        qs = 11
+    else:
+        raise ValueError(f'Invalid experiment provided: {expt}')
+
+    save_dir = os.path.join(save_dir, savestr, str(yr), ym, ymd)
     os.makedirs(save_dir, exist_ok=True)
 
-    plt_region = pf.plot_regions()
-    extent = plt_region['windturb']['extent']
-
-    files = sorted(glob.glob(os.path.join(file_dir, '1km_wf2km', ymd, '*.nc')))
+    files = sorted(glob.glob(os.path.join(file_dir, expt, ymd, '*.nc')))
     for fname in files:
         if fname.split('_')[-1] == 'H000.nc':
             continue
@@ -160,7 +172,6 @@ def main(args):
             pf.map_add_boem_outlines(ax3, lease, **kwargs)
 
             # add vectors to wind speed maps
-            qs = 5
             ax1.quiver(lon[::qs, ::qs], lat[::qs, ::qs], u_std_ctrl.values[::qs, ::qs], v_std_ctrl.values[::qs, ::qs],
                        scale=30, width=.002, headlength=4, transform=ccrs.PlateCarree())
             ax2.quiver(lon[::qs, ::qs], lat[::qs, ::qs], u_std.values[::qs, ::qs], v_std.values[::qs, ::qs],
@@ -184,6 +195,12 @@ if __name__ == '__main__':
     arg_parser.add_argument('ymd',
                             type=str,
                             help='Year-month-day to plot in the format YYYYmmdd (e.g. 20220101.')
+
+    arg_parser.add_argument('-expt',
+                            type=str,
+                            default='1km_wf2km',
+                            choices=['1km_wf2km' '1km_wf2km_nyb'],
+                            help='Experiment version to plot against the control')
 
     arg_parser.add_argument('-heights',
                             type=list,

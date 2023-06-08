@@ -175,7 +175,11 @@ def plot_regions():
                       xticks=[-74.7, -74.4, -74.1, -73.8],
                       yticks=[39, 39.3, 39.6],
                       subset=True,
-                      lease_area=True)
+                      lease_area=True),
+        windturb_nyb=dict(quiver_subset=dict(_10m=3, _160m=3, _200m=3, _250m=3, _500m=3),
+                          quiver_scale=40,
+                          extent=[-75.1, -72.2, 38.1, 40.5],
+                          lease_area=True)
     )
 
     return regions
