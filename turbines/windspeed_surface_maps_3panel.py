@@ -55,6 +55,12 @@ def main(args):
     os.makedirs(save_dir, exist_ok=True)
 
     files = sorted(glob.glob(os.path.join(file_dir, expt, ymd, '*.nc')))
+    
+    # initialize totals for the 24 hour period
+    cumulative_power_total = 0
+    cumulative_power_ctrl_total = 0
+    cumulative_power_diff_total = 0
+    
     for fname in files:
         if fname.split('_')[-1] == 'H000.nc':
             continue
@@ -114,9 +120,10 @@ def main(args):
             cumulative_power_ctrl = np.round(np.sum(power_ctrl) / 1000000, 2)
             cumulative_power_diff = np.round(cumulative_power - cumulative_power_ctrl, 2)
             
-            print(f"Cumulative Power: {cumulative_power} GW")
-            print(f"Cumulative Control Power: {cumulative_power_ctrl} GW")
-            print(f"Cumulative Power Difference: {cumulative_power_diff} GW")
+            # add each hour for the 24 hour total
+            cumulative_power_total += cumulative_power
+            cumulative_power_ctrl_total += cumulative_power_ctrl
+            cumulative_power_diff_total += cumulative_power_diff
 
             diff = speed - speed_ctrl
             masked_diff = np.ma.masked_inside(diff, -0.5, 0.5)
@@ -196,6 +203,12 @@ def main(args):
             ax3.set_title(f'Wind Speed Difference', y=1.02)
             plt.savefig(save_file, dpi=200)
             plt.close()
+
+
+    # print statement for 24 hour power totals          
+    print(f"Final Cumulative Power: {cumulative_power_total} GW")
+    print(f"Final Cumulative Control Power: {cumulative_power_ctrl_total} GW")
+    print(f"Final Cumulative Power Difference: {cumulative_power_diff_total} GW")
 
 
 if __name__ == '__main__':
