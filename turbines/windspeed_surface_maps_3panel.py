@@ -113,6 +113,10 @@ def main(args):
             cumulative_power = np.round(np.sum(power) / 1000000, 2)
             cumulative_power_ctrl = np.round(np.sum(power_ctrl) / 1000000, 2)
             cumulative_power_diff = np.round(cumulative_power - cumulative_power_ctrl, 2)
+            
+            print(f"Cumulative Power: {cumulative_power} GW")
+            print(f"Cumulative Control Power: {cumulative_power_ctrl} GW")
+            print(f"Cumulative Power Difference: {cumulative_power_diff} GW")
 
             diff = speed - speed_ctrl
             masked_diff = np.ma.masked_inside(diff, -0.5, 0.5)
