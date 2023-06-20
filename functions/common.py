@@ -3,6 +3,7 @@
 import logging
 import numpy as np
 import pandas as pd
+import datetime as dt
 
 
 def daterange_interval(interval, time_array):
@@ -24,6 +25,30 @@ def daterange_interval(interval, time_array):
         dr_interval.append([min_date, max_date])
 
     return dr_interval
+
+
+def return_seabreeze_datetimes(csvfile='/home/wrfadmin/toolboxes/wind-science/files/BPU_Seabreeze.csv'):
+    """
+    Returns two datetime indices of seabreeze vs non-seabreeze days at hourly intervals (to match WRF output)
+    csvfile: csv file containing seabreeze and non-seabreeze days, default is ../files/BPU_Seabreeze.csv file
+    """
+    df = pd.read_csv(csvfile)
+
+    # get seabreeze datetimes
+    df_sb = df[df['sea_breeze'] == 'Y']
+    sb_dates = np.array(pd.to_datetime(df_sb['date']))
+    sb_datetimes = [pd.date_range(pd.to_datetime(x), pd.to_datetime(x) + dt.timedelta(hours=23), freq='H') for x in
+                    sb_dates]
+    sb_datetimes = pd.to_datetime(sorted([inner for outer in sb_datetimes for inner in outer]))
+
+    # get non-seabreeze datetimes
+    df_nosb = df[df['sea_breeze'] == 'N']
+    nosb_dates = np.array(pd.to_datetime(df_nosb['date']))
+    nosb_datetimes = [pd.date_range(pd.to_datetime(x), pd.to_datetime(x) + dt.timedelta(hours=23), freq='H') for x
+                      in nosb_dates]
+    nosb_datetimes = pd.to_datetime(sorted([inner for outer in nosb_datetimes for inner in outer]))
+
+    return sb_datetimes, nosb_datetimes
 
 
 def setup_logger(name, loglevel, logfile):

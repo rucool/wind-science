@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 3/13/2023
-Last modified: 3/16/2023
+Last modified: 6/20/2023
 Creates wind rose plots from WRF data at user-defined time intervals, heights, and locations.
 """
 
@@ -93,6 +93,13 @@ def main(args):
     if interval == 'none':
         intervals = [[start_date, end_date]]
         save_dir = os.path.join(save_dir, location)
+    elif interval == 'seabreeze':  # break up date range into seabreeze and non-seabreeze days
+        #sb_times, nosb_times = cf.return_seabreeze_datetimes(csvfile='/Users/garzio/Documents/repo/rucool/wind-science/files/BPU_Seabreeze.csv')
+        sb_times, nosb_times = cf.return_seabreeze_datetimes()
+        sb_times = sb_times[np.logical_and(sb_times >= start_date, sb_times <= end_date)]
+        nosb_times = nosb_times[np.logical_and(nosb_times >= start_date, nosb_times <= end_date)]
+        intervals = [sb_times, nosb_times]
+        save_dir = os.path.join(save_dir, location, interval)
     else:
         test = ds.time
         intervals = cf.daterange_interval(interval, test)
@@ -100,14 +107,39 @@ def main(args):
 
     os.makedirs(save_dir, exist_ok=True)
 
-    for intvl in intervals:
-        sd = pd.to_datetime(intvl[0])
-        ed = pd.to_datetime(intvl[1])
-        #sd = dt.datetime(2022, 3, 1, 0, 0)  # for debugging
-        #ed = dt.datetime(2022, 3, 1, 0, 0)  # for debugging
-        dst = ds.sel(time=slice(sd, ed))
-        if len(dst.time) == 0:
-            raise ValueError(f'No data found for: {domain}, {sd.strftime("%Y%m%d")} to {ed.strftime("%Y%m%d")}')
+    for i_intvl, intvl in enumerate(intervals):
+        if interval == 'seabreeze':
+            dst = ds.sel(time=intvl)
+            if i_intvl == 0:
+                version = 'seabreeze'
+                ttl_version = 'Seabreeze Days'
+            else:
+                version = 'noseabreeze'
+                ttl_version = 'Non-Seabreeze Days'
+
+            if len(dst.time) == 0:
+                raise ValueError(f'No data found for: {domain} {version}, {start_date.strftime("%Y%m%d")} to {end_date.strftime("%Y%m%d")}')
+
+            # define title and save names
+            title_dt = f'{ttl_version} {start_date.strftime("%Y-%m-%d")} to {end_date.strftime("%Y-%m-%d")}'
+            save_dt = f'{start_date.strftime("%Y%m%d")}_{end_date.strftime("%Y%m%d")}_{version}'
+        else:
+            sd = pd.to_datetime(intvl[0])
+            ed = pd.to_datetime(intvl[1])
+            #sd = dt.datetime(2022, 3, 1, 0, 0)  # for debugging
+            #ed = dt.datetime(2022, 3, 2, 0, 0)  # for debugging
+            dst = ds.sel(time=slice(sd, ed))
+            if len(dst.time) == 0:
+                raise ValueError(f'No data found for: {domain}, {sd.strftime("%Y%m%d")} to {ed.strftime("%Y%m%d")}')
+
+            # define title and save names
+            if interval == 'monthly':
+                title_dt = sd.strftime("%b %Y")
+                save_dt = sd.strftime("%Y%m%d")
+            else:
+                title_dt = f'{sd.strftime("%Y-%m-%d")} to {ed.strftime("%Y-%m-%d")}'
+                save_dt = f'{sd.strftime("%Y%m%d")}_{ed.strftime("%Y%m%d")}'
+
         lat = dst['XLAT']
         lon = dst['XLONG']
 
@@ -130,12 +162,6 @@ def main(args):
         vsub = v[:, i, j]
 
         ax = new_axes()
-        if interval == 'monthly':
-            title_dt = sd.strftime("%b %Y")
-            save_dt = sd.strftime("%Y%m%d")
-        else:
-            title_dt = f'{sd.strftime("%Y-%m-%d")} to {ed.strftime("%Y-%m-%d")}'
-            save_dt = f'{sd.strftime("%Y%m%d")}_{ed.strftime("%Y%m%d")}'
 
         plt_title = f'RU-WRF {title_label} at {location}\n{title_dt}: {height}m'
         sname = f'windrose_{domain}_{location}_{height}m_{save_dt}.png'
@@ -170,9 +196,10 @@ if __name__ == '__main__':
                             dest='interval',
                             default='monthly',
                             type=str,
-                            choices=['monthly', 'seasonal', 'none'],
+                            choices=['monthly', 'seasonal', 'none', 'seabreeze'],
                             help='Interval into which the time range provided is divided. If "none", the entire time '
-                                 'range provided is grouped into one windrose.')
+                                 'range provided is grouped into one windrose. If "seabreeze" the entire time range'
+                                 'provided is broken into seabreeze and non-seabreeze days.')
 
     arg_parser.add_argument('-location',
                             dest='location',
