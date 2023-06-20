@@ -24,7 +24,8 @@ def new_axes():
     Create new wind rose axes
     """
     fig = plt.figure(figsize=(8, 8), dpi=80, facecolor='w', edgecolor='w')
-    rect = [0.15, 0.15, 0.75, 0.75]
+    # rect = [0.15, 0.15, 0.75, 0.75]
+    rect = [0.15, 0.13, 0.72, 0.75]
     ax = WindroseAxes(fig, rect, facecolor='w')
     fig.add_axes(ax)
     return ax
@@ -112,16 +113,16 @@ def main(args):
             dst = ds.sel(time=intvl)
             if i_intvl == 0:
                 version = 'seabreeze'
-                ttl_version = 'Seabreeze Days'
+                ttl_version = f'Seabreeze Days (n={int(len(dst.time)/24)})'
             else:
                 version = 'noseabreeze'
-                ttl_version = 'Non-Seabreeze Days'
+                ttl_version = f'Non-Seabreeze Days (n={int(len(dst.time)/24)})'
 
             if len(dst.time) == 0:
                 raise ValueError(f'No data found for: {domain} {version}, {start_date.strftime("%Y%m%d")} to {end_date.strftime("%Y%m%d")}')
 
             # define title and save names
-            title_dt = f'{ttl_version} {start_date.strftime("%Y-%m-%d")} to {end_date.strftime("%Y-%m-%d")}'
+            title_dt = f'{ttl_version}\n{start_date.strftime("%Y-%m-%d")} to {end_date.strftime("%Y-%m-%d")}'
             save_dt = f'{start_date.strftime("%Y%m%d")}_{end_date.strftime("%Y%m%d")}_{version}'
         else:
             sd = pd.to_datetime(intvl[0])
