@@ -159,3 +159,23 @@ def assign_upwelling(data, upwelling_file, satellite):
     data=data.drop(columns=['date',satellite])
 
     return data
+
+def assign_seabreeze_days(data, seabreeze_file):
+    """
+    Assigns seabreeze days to pandas dataframe (if seabreeze Y, ENTIRE day is defined as seabreeze)
+    data: pandas dataframe with 'time' column
+    seabreeze_file: name of csv file containing seabreeze dates 
+        (columns: date (yyyy-mm-dd) and sea-breeze (Y=seabreeze, N=no seabreeze))
+    """
+
+    seabreeze = pd.read_csv(seabreeze_file)
+    seabreeze['date'] = pd.to_datetime(seabreeze['date'], format='%Y-%m-%d')
+    data['date'] = pd.to_datetime(data['time'].dt.date)
+    seabreeze = seabreeze[['date','sea_breeze']]
+    data = pd.merge(data, seabreeze, on='date', how='left')
+    data['seabreeze'] = 'seabreeze NA'
+    data['seabreeze'][data['sea_breeze']=='Y'] = 'seabreeze present'
+    data['seabreeze'][data['sea_breeze']=='N'] = 'seabreeze absent'
+    data=data.drop(columns=['date','sea_breeze'])
+
+    return data
