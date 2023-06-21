@@ -86,6 +86,7 @@ def main(args):
     location = args.location
     height = args.height
     domain = args.domain
+    plot_power = args.plot_power
     save_dir = args.save_dir
 
     start_date = dt.datetime.strptime(start_str, '%Y%m%d')
