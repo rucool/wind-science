@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 3/13/2023
-Last modified: 6/20/2023
+Last modified: 6/21/2023
 Creates wind rose plots from WRF data at user-defined time intervals, heights, and locations.
 """
 
@@ -147,8 +147,12 @@ def main(args):
                 raise ValueError(f'No data found for: {domain} {version}, {start_date.strftime("%Y%m%d")} to {end_date.strftime("%Y%m%d")}')
 
             # define title and save names
-            title_dt = f'{ttl_version}\n{start_date.strftime("%Y-%m-%d")} to {end_date.strftime("%Y-%m-%d")}'
-            save_dt = f'{start_date.strftime("%Y%m%d")}_{end_date.strftime("%Y%m%d")}_{version}'
+            if np.logical_and(start_str == '20200601', end_str == '20220831'):
+                title_dt = f'{ttl_version}\nJune-July-Aug 2020-2022'
+                save_dt = f'summers2020_2022_{version}'
+            else:
+                title_dt = f'{ttl_version}\n{start_date.strftime("%Y-%m-%d")} to {end_date.strftime("%Y-%m-%d")}'
+                save_dt = f'{start_date.strftime("%Y%m%d")}_{end_date.strftime("%Y%m%d")}_{version}'
         else:
             sd = pd.to_datetime(intvl[0])
             ed = pd.to_datetime(intvl[1])
