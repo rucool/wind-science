@@ -31,6 +31,30 @@ def new_axes():
     return ax
 
 
+def plt_powerrose(axis, power, wdir, ttl):
+    # set the bins
+    b = [0, 2500, 5000, 7500, 10000, 12500, 15000]
+    axis.bar(wdir, power, normed=True, bins=b, opening=1, edgecolor='black', cmap=cm.jet, nsector=36)
+
+    # add % to y-axis labels
+    newticks = ['{:.0%}'.format(x / 100) for x in axis.get_yticks()]
+    axis.set_yticklabels(newticks)
+
+    # format legend
+    # move legend
+    al = axis.legend(borderaxespad=-7, title='Power (kW)')
+
+    # replace the text in the legend
+    text_str = ['0$\leq$ p <2500', '2,500$\leq$ p <5000', '5,000$\leq$ p <7500', '7,500$\leq$ p <10,000',
+                '10,000$\leq$ p <12,500', '12,500$\leq$ p <15,000', 'p $\geq$15,000']
+    for i, txt in enumerate(al.get_texts()):
+        txt.set_text(text_str[i])
+    plt.setp(al.get_texts(), fontsize=10)
+
+    # add title
+    axis.set_title(ttl, fontsize=14)
+
+
 def plt_windrose(axis, wspd, wdir, ttl):
     # set the bins for wind speeds
     b = [0, 5, 10, 15, 20, 25, 30]
@@ -158,7 +182,7 @@ def main(args):
         # find the indices of the minimum value in the array calculated above
         i, j = np.unravel_index(a.argmin(), a.shape)
 
-        # grab the data just at that location
+        # grab the data at that location
         usub = u[:, i, j]
         vsub = v[:, i, j]
 
@@ -175,6 +199,20 @@ def main(args):
 
         plt.savefig(sfile, dpi=150)
         plt.close()
+
+        if plot_power:
+            #power_curve = pd.read_csv('/home/wrfadmin/toolboxes/wind-science/files/wrf_lw15mw_power.csv')
+            power_curve = pd.read_csv('/Users/garzio/Documents/rucool/bpu/wrf/wrf_lw15mw_power.csv')  # on local machine
+
+            power = np.interp(ws, power_curve['Wind Speed'], power_curve['Power'])
+
+            ax = new_axes()
+            plt_powerrose(ax, power, wdir, plt_title)
+
+            sname = f'powerrose_{domain}_{location}_{height}m_{save_dt}.png'
+            sfile = os.path.join(save_dir, sname)
+            plt.savefig(sfile, dpi=150)
+            plt.close()
 
 
 if __name__ == '__main__':
@@ -222,6 +260,12 @@ if __name__ == '__main__':
                             choices=['3km', '1km_wf2km', '1km_ctrl'],
                             help='Operational: 3km, research 1km with simulated windfarm: 1km_wf2km,'
                                  'research 1km control: 1km_ctrl')
+
+    arg_parser.add_argument('-plot_power',
+                            default=False,
+                            type=bool,
+                            choices=[True, False],
+                            help='Option to plot power roses, default is False')
 
     arg_parser.add_argument('-save_dir',
                             default='/www/web/rucool/windenergy/ru-wrf/images/windrose',
