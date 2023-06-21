@@ -202,8 +202,7 @@ def main(args):
         plt.close()
 
         if plot_power:
-            #power_curve = pd.read_csv('/home/wrfadmin/toolboxes/wind-science/files/wrf_lw15mw_power.csv')
-            power_curve = pd.read_csv('/Users/garzio/Documents/rucool/bpu/wrf/wrf_lw15mw_power.csv')  # on local machine
+            power_curve = pd.read_csv('/home/wrfadmin/toolboxes/wind-science/files/wrf_lw15mw_power.csv')
 
             power = np.interp(ws, power_curve['Wind Speed'], power_curve['Power'])
 
