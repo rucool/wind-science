@@ -59,7 +59,8 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
 
     shortnames={'upwelling': {'upwelling NA': 'upw-NA', 'upwelling absent': 'upw-N', 'upwelling present': 'upw-Y'},
         'turbines': {'wind farm': 'WF', 'control': 'ctrl'},
-        'season': {'winter': 'Win', 'spring': 'Spr', 'summer': 'Sum', 'fall': 'Aut'}}
+        'season': {'winter': 'Win', 'spring': 'Spr', 'summer': 'Sum', 'fall': 'Aut'},
+        'seabreeze': {'seabreeze NA': 'sb-NA', 'seabreeze absent': 'sb-N', 'seabreeze present': 'sb-Y'}}
     shortlabels=False
     if len(group)>1:
         shortlabels=True
@@ -135,7 +136,7 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
                                 clabel = calendar.month_abbr[c]
                             if shortlabels and group[2] in shortnames.keys():
                                 clabel = shortnames[group[2]][c]
-                            if c==order_vars[2][0] and a != order_vars[0][0]:
+                            if c==order_vars[2][0] and (a != order_vars[0][0] or b != order_vars[1][0]):
                                 xl=' '
                                 ovdf = pd.concat([ovdf,pd.DataFrame({'order_var': [ov], 'xlabels': [xl], dv: [np.nan], 'color': [' '], 'hatch': [' ']})], axis=0, ignore_index=True)
                                 xt=np.append(xt,ov)

@@ -148,6 +148,7 @@ def assign_upwelling(data, upwelling_file, satellite):
     satellite: name of column in upwelling_file that defines upwelling yes/no
     """
 
+    clms = list(data.columns)
     upwelling = pd.read_csv(upwelling_file)
     upwelling['date'] = pd.to_datetime(upwelling['Year'].astype(str)+'-'+upwelling['Month']+'-'+upwelling['Day'].astype(str))
     data['date'] = pd.to_datetime(data['time'].dt.date)
@@ -156,7 +157,8 @@ def assign_upwelling(data, upwelling_file, satellite):
     data['upwelling'] = 'upwelling NA'
     data['upwelling'][data[satellite]==1] = 'upwelling present'
     data['upwelling'][data[satellite]==0] = 'upwelling absent'
-    data=data.drop(columns=['date',satellite])
+    clms.append('upwelling')
+    data=data[clms]
 
     return data
 
@@ -168,6 +170,7 @@ def assign_seabreeze_days(data, seabreeze_file):
         (columns: date (yyyy-mm-dd) and sea-breeze (Y=seabreeze, N=no seabreeze))
     """
 
+    clms = list(data.columns)
     seabreeze = pd.read_csv(seabreeze_file)
     seabreeze['date'] = pd.to_datetime(seabreeze['date'], format='%Y-%m-%d')
     data['date'] = pd.to_datetime(data['time'].dt.date)
@@ -176,6 +179,7 @@ def assign_seabreeze_days(data, seabreeze_file):
     data['seabreeze'] = 'seabreeze NA'
     data['seabreeze'][data['sea_breeze']=='Y'] = 'seabreeze present'
     data['seabreeze'][data['sea_breeze']=='N'] = 'seabreeze absent'
-    data=data.drop(columns=['date','sea_breeze'])
+    clms.append('seabreeze')
+    data=data[clms]
 
     return data

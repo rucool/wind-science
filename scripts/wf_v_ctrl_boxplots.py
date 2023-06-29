@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from functions import grouped_data_patterns as summary
-from functions.common import wind_uv_to_spd, wind_uv_to_dir, wind_dir_to_quadrant, get_predominant_quadrant, assign_upwelling
+from functions.common import wind_uv_to_spd, wind_uv_to_dir, wind_dir_to_quadrant, get_predominant_quadrant, assign_upwelling, assign_seabreeze_days
 
 
 def main(args):
@@ -31,6 +31,7 @@ def main(args):
     gf = args.grouped_csv
     upwelling_file = args.upwelling_file
     upwelling_source = args.upwelling_source
+    seabreeze_file = args.seabreeze_file
 
     if len(group)>1:
         ab=False
@@ -94,25 +95,26 @@ def main(args):
     winddata['speed'] = wind_uv_to_spd(winddata['U'], winddata['V'])
     winddata['dir'] = wind_uv_to_dir(winddata['U'], winddata['V'])
     winddata['quadrant'] = wind_dir_to_quadrant(winddata['dir'])
-    winddata['winddir'] = 'NA'
-    winddata['ctrldir'] = 'NA'
-    winddata['wfdir'] = 'NA'
-    powerdata['winddir'] = 'NA'
-    powerdata['ctrldir'] = 'NA'
-    powerdata['wfdir'] = 'NA'
-    for t in np.unique(winddata['time']):
-        wfdir, wfp = get_predominant_quadrant(winddata['quadrant'][np.logical_and(winddata['time']==t,winddata['turbines']=='wind farm')])
-        ctrldir, ctrlp = get_predominant_quadrant(winddata['quadrant'][np.logical_and(winddata['time']==t,winddata['turbines']=='control')])
-        if wfp >= 75:
-            winddata['winddir'][np.logical_and(winddata['time']==t,winddata['turbines']=='wind farm')] = wfdir
-            powerdata['winddir'][np.logical_and(powerdata['time']==t,powerdata['turbines']=='wind farm')] = wfdir
-            winddata['wfdir'][winddata['time']==t] = wfdir
-            powerdata['wfdir'][powerdata['time']==t] = wfdir
-        if ctrlp >= 75:
-            winddata['winddir'][np.logical_and(winddata['time']==t,winddata['turbines']=='control')] = ctrldir
-            powerdata['winddir'][np.logical_and(powerdata['time']==t,powerdata['turbines']=='control')] = ctrldir
-            winddata['ctrldir'][winddata['time']==t] = ctrldir
-            powerdata['ctrldir'][powerdata['time']==t] = ctrldir
+    if 'winddir' in group or 'ctrldir' in group or 'wfdir' in group:
+        winddata['winddir'] = 'NA'
+        winddata['ctrldir'] = 'NA'
+        winddata['wfdir'] = 'NA'
+        powerdata['winddir'] = 'NA'
+        powerdata['ctrldir'] = 'NA'
+        powerdata['wfdir'] = 'NA'
+        for t in np.unique(winddata['time']):
+            wfdir, wfp = get_predominant_quadrant(winddata['quadrant'][np.logical_and(winddata['time']==t,winddata['turbines']=='wind farm')])
+            ctrldir, ctrlp = get_predominant_quadrant(winddata['quadrant'][np.logical_and(winddata['time']==t,winddata['turbines']=='control')])
+            if wfp >= 75:
+                winddata['winddir'][np.logical_and(winddata['time']==t,winddata['turbines']=='wind farm')] = wfdir
+                powerdata['winddir'][np.logical_and(powerdata['time']==t,powerdata['turbines']=='wind farm')] = wfdir
+                winddata['wfdir'][winddata['time']==t] = wfdir
+                powerdata['wfdir'][powerdata['time']==t] = wfdir
+            if ctrlp >= 75:
+                winddata['winddir'][np.logical_and(winddata['time']==t,winddata['turbines']=='control')] = ctrldir
+                powerdata['winddir'][np.logical_and(powerdata['time']==t,powerdata['turbines']=='control')] = ctrldir
+                winddata['ctrldir'][winddata['time']==t] = ctrldir
+                powerdata['ctrldir'][powerdata['time']==t] = ctrldir
     # data['time']=pd.to_datetime(data.index)
     winddata['year'] = winddata['time'].dt.year
     winddata['month'] = winddata['time'].dt.month
@@ -139,8 +141,15 @@ def main(args):
         powerdata.loc[np.logical_and(powerdata['month']>=9,powerdata['month']<=11), 'season'] = 'fall'
 
     if 'upwelling' in group:
+        winddata=winddata[winddata['season']=='summer']
+        powerdata=powerdata[powerdata['season']=='summer']
         winddata = assign_upwelling(winddata, upwelling_file, upwelling_source)
         powerdata = assign_upwelling(powerdata, upwelling_file, upwelling_source)
+    if 'seabreeze' in group:
+        winddata=winddata[winddata['season']=='summer']
+        powerdata=powerdata[powerdata['season']=='summer']
+        winddata = assign_seabreeze_days(winddata, seabreeze_file)
+        powerdata = assign_seabreeze_days(powerdata, seabreeze_file)
 
     # all_leases = '_'.join(list(np.unique(data['lease_code'])))
     # all_heights = '_'.join(list(np.unique(data['height']).astype(str)))
@@ -264,6 +273,12 @@ if __name__ == '__main__':
                             default='AVHRR',
                             type=str,
                             help='Source used to determine upwelling (must be column of 0s and 1s in upwelling_file)')
+    
+    arg_parser.add_argument('-sf', '--seabreeze_file',
+                            dest='seabreeze_file',
+                            default='BPU_Seabreeze.csv',
+                            type=str,
+                            help='File containing seabreeze and non-seabreeze dates')
     
     arg_parser.add_argument('-g', '--groups',
                             dest='groups',
