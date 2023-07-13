@@ -159,7 +159,7 @@ def main(args):
             dst = ds.isel(time=intvl)
             min_year = np.nanmin(dst['time.year'])
             max_year = np.nanmax(dst['time.year'])
-            title_dt = f'Summer\nJune-July-Aug {str(min_year)}-{str(max_year)}'
+            title_dt = f'June-July-Aug {str(min_year)}-{str(max_year)}'
             save_dt = f'summers{str(min_year)}_{str(max_year)}'
         else:
             sd = pd.to_datetime(intvl[0])
