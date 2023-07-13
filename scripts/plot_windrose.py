@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 3/13/2023
-Last modified: 6/21/2023
+Last modified: 7/13/2023
 Creates wind rose plots from WRF data at user-defined time intervals, heights, and locations.
 """
 
@@ -125,12 +125,14 @@ def main(args):
         sb_times = sb_times[np.logical_and(sb_times >= start_date, sb_times <= end_date)]
         nosb_times = nosb_times[np.logical_and(nosb_times >= start_date, nosb_times <= end_date)]
         intervals = [sb_times, nosb_times]
-        save_dir = os.path.join(save_dir, location, interval)
+    elif interval == 'summers':
+        months = ds['time.month']
+        intervals = list(np.where((months == 6) | (months == 7) | (months == 8)))
     else:
         test = ds.time
         intervals = cf.daterange_interval(interval, test)
-        save_dir = os.path.join(save_dir, location, interval)
 
+    save_dir = os.path.join(save_dir, location, interval)
     os.makedirs(save_dir, exist_ok=True)
 
     for i_intvl, intvl in enumerate(intervals):
@@ -153,6 +155,12 @@ def main(args):
             else:
                 title_dt = f'{ttl_version}\n{start_date.strftime("%Y-%m-%d")} to {end_date.strftime("%Y-%m-%d")}'
                 save_dt = f'{start_date.strftime("%Y%m%d")}_{end_date.strftime("%Y%m%d")}_{version}'
+        elif interval == 'summers':
+            dst = ds.isel(time=intvl)
+            min_year = np.nanmin(dst['time.year'])
+            max_year = np.nanmax(dst['time.year'])
+            title_dt = f'Summer\nJune-July-Aug {str(min_year)}-{str(max_year)}'
+            save_dt = f'summers{str(min_year)}_{str(max_year)}'
         else:
             sd = pd.to_datetime(intvl[0])
             ed = pd.to_datetime(intvl[1])
@@ -239,10 +247,11 @@ if __name__ == '__main__':
                             dest='interval',
                             default='monthly',
                             type=str,
-                            choices=['monthly', 'seasonal', 'none', 'seabreeze'],
+                            choices=['monthly', 'seasonal', 'none', 'seabreeze', 'summers'],
                             help='Interval into which the time range provided is divided. If "none", the entire time '
                                  'range provided is grouped into one windrose. If "seabreeze" the entire time range'
-                                 'provided is broken into seabreeze and non-seabreeze days.')
+                                 'provided is broken into seabreeze and non-seabreeze days. If "summers" the entire'
+                                 'time range provided is subset for summers only (June-July-Aug')
 
     arg_parser.add_argument('-location',
                             dest='location',
