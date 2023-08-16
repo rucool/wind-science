@@ -95,7 +95,7 @@ def main(args):
 
     if domain == '3km':
         if subset_dir:
-            mlink = '/home/coolgroup/bpu/wrf/data/wrf_nc/wea_centroids/3km/{location}_160_3km.nc'
+            mlink = f'/home/coolgroup/bpu/wrf/data/wrf_nc/wea_centroids/3km/{location}_160_3km.nc'
             height = 160  # height must be 160m if using subset files
         else:
             mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
