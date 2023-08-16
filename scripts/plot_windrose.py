@@ -183,10 +183,10 @@ def main(args):
 
             # define title and save names
             if interval == 'monthly':
-                title_dt = f'{sd.strftime("%b %Y")}: (n={int(len(dst.time)/24)} days)'
+                title_dt = f'{sd.strftime("%b %Y")}: {int(len(dst.time)/24)} days'
                 save_dt = sd.strftime("%Y%m%d")
             else:
-                title_dt = f'{sd.strftime("%Y-%m-%d")} to {ed.strftime("%Y-%m-%d")}: (n={int(len(dst.time)/24)} days)'
+                title_dt = f'{sd.strftime("%Y-%m-%d")} to {ed.strftime("%Y-%m-%d")}: {int(len(dst.time)/24)} days'
                 save_dt = f'{sd.strftime("%Y%m%d")}_{ed.strftime("%Y%m%d")}'
 
         if np.logical_and(subset_dir, domain == '3km'):  # if using the 3km subset file that's already specific to a centroid
