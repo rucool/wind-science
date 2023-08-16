@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 3/13/2023
-Last modified: 7/13/2023
+Last modified: 8/16/2023
 Creates wind rose plots from WRF data at user-defined time intervals, heights, and locations.
 """
 
@@ -87,22 +87,36 @@ def main(args):
     height = args.height
     domain = args.domain
     plot_power = args.plot_power
+    subset_dir = args.subset_dir
     save_dir = args.save_dir
 
     start_date = dt.datetime.strptime(start_str, '%Y%m%d')
     end_date = dt.datetime.strptime(end_str, '%Y%m%d') + dt.timedelta(hours=23)
 
     if domain == '3km':
-        mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
+        if subset_dir:
+            mlink = '/home/coolgroup/bpu/wrf/data/wrf_nc/wea_centroids/3km/{location}_160_3km.nc'
+            height = 160  # height must be 160m if using subset files
+        else:
+            mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
         title_label = '3km'
     elif domain == '1km_wf2km':
-        mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_1km_wf2km_processed/WRF_4.1_1km_with_Wind_Farm_Processed_Dataset_Best'
+        if subset_dir:
+            ValueError('subset_dir must be set to False when plotting 1km_wf2km data')
+        else:
+            mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_1km_wf2km_processed/WRF_4.1_1km_with_Wind_Farm_Processed_Dataset_Best'
         title_label = '1km Wind Farm'
     elif domain == '1km_ctrl':
-        mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_1km_ctrl_processed/WRF_4.1_1km_Control_Processed_Dataset_Best'
+        if subset_dir:
+            ValueError('subset_dir must be set to False when plotting 1km_ctrl data')
+        else:
+            mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_1km_ctrl_processed/WRF_4.1_1km_Control_Processed_Dataset_Best'
         title_label = '1km Control'
     else:
         raise ValueError('Invalid domain specified')
+
+    ds = xr.open_dataset(mlink)
+    ds = ds.sel(time=slice(start_date, end_date))
 
     # locations of lease area centroids
     location_csv = '/home/wrfadmin/toolboxes/wind-science/files/lease_centroids.csv'
@@ -111,9 +125,6 @@ def main(args):
     df = loc_df[loc_df['lease_code'] == location]
     if len(df) == 0:
         raise ValueError('Please provide a valid lease code, found in ./files/lease_centroids.csv (i.e. "OCS-A0512")')
-
-    ds = xr.open_dataset(mlink)
-    ds = ds.sel(time=slice(start_date, end_date))
 
     # break up date range into the plotting interval specified
     if interval == 'none':
@@ -178,26 +189,34 @@ def main(args):
                 title_dt = f'{sd.strftime("%Y-%m-%d")} to {ed.strftime("%Y-%m-%d")}'
                 save_dt = f'{sd.strftime("%Y%m%d")}_{ed.strftime("%Y%m%d")}'
 
-        lat = dst['XLAT']
-        lon = dst['XLONG']
-
-        if height == 10:
-            u = dst['U10']
-            v = dst['V10']
+        if np.logical_and(subset_dir, domain == '3km'):  # if using the 3km subset file that's already specific to a centroid
+            usub = dst.U
+            vsub = dst.V
         else:
-            u = dst.sel(height=height)['U']
-            v = dst.sel(height=height)['V']
+            lat = dst['XLAT']
+            lon = dst['XLONG']
 
-        # Find the closest model point to location
-        # calculate the sum of the absolute value distance between the model location and buoy location
-        a = abs(lat - df.lat.values[0]) + abs(lon - df.long.values[0])
+            if height == 10:
+                u = dst['U10']
+                v = dst['V10']
+            else:
+                try:
+                    u = dst.sel(height=height)['U']
+                    v = dst.sel(height=height)['V']
+                except KeyError:  # the file only has one height (160m)
+                    u = dst.U
+                    v = dst.V
 
-        # find the indices of the minimum value in the array calculated above
-        i, j = np.unravel_index(a.argmin(), a.shape)
+            # Find the closest model point to location
+            # calculate the sum of the absolute value distance between the model location and buoy location
+            a = abs(lat - df.lat.values[0]) + abs(lon - df.long.values[0])
 
-        # grab the data at that location
-        usub = u[:, i, j]
-        vsub = v[:, i, j]
+            # find the indices of the minimum value in the array calculated above
+            i, j = np.unravel_index(a.argmin(), a.shape)
+
+            # grab the data at that location
+            usub = u[:, i, j]
+            vsub = v[:, i, j]
 
         ax = new_axes()
 
@@ -279,6 +298,14 @@ if __name__ == '__main__':
                             type=bool,
                             choices=[True, False],
                             help='Option to plot power roses, default is False')
+
+    arg_parser.add_argument('-subset_dir',
+                            default=False,
+                            type=bool,
+                            choices=[True, False],
+                            help='Option to use a previously-generated subset file in '
+                                 '/home/coolgroup/bpu/wrf/data/wrf_nc/wea_centroids/3km. If set to True, height must '
+                                 'be 160m and domain must be 3km. Default is False')
 
     arg_parser.add_argument('-save_dir',
                             default='/www/web/rucool/windenergy/ru-wrf/images/windrose',
