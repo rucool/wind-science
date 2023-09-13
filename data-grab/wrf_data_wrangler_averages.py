@@ -2,8 +2,8 @@
 
 """
 Author: Lori Garzio on 4/25/2023
-Last modified: Lori Garzio 5/3/2023
-Grab U and V data from THREDDS for a user-defined time-range and height, calculate monthly averages and variance
+Last modified: Lori Garzio 9/13/2023
+Grab U and V data at 10m and 160m from THREDDS for a user-defined time-range, calculate monthly averages and variance
 and export as NetCDF.
 """
 
@@ -22,10 +22,11 @@ pd.set_option('display.width', 320, "display.max_columns", 15)  # for display in
 def main(args):
     start_str = args.start
     end_str = args.end
-    height = args.height
     domain = args.domain
     save_dir = args.save_dir
     loglevel = args.loglevel.upper()
+
+    heights = [10, 160]
 
     start_date = dt.datetime.strptime(start_str, '%Y%m%d')
     end_date = dt.datetime.strptime(end_str, '%Y%m%d') + dt.timedelta(hours=23)
@@ -47,17 +48,18 @@ def main(args):
     os.makedirs(save_dir_logs, exist_ok=True)
 
     # set up log file
-    logfile = os.path.join(save_dir_logs, f'{domain}_{height}.log')
+    logfile = os.path.join(save_dir_logs, f'{domain}_monthly-avgs.log')
     logging = cf.setup_logger(f'logging_{domain}', loglevel, logfile)
 
     # check if a NetCDF file already exists
-    save_file = os.path.join(save_dir, f'{domain}_{height}_monthly_averages.nc')
+    save_file = os.path.join(save_dir, f'ruwrf_{domain}_monthly_averages.nc')
     if os.path.isfile(save_file):
-        logging.warning(f'File for {domain} and height {height}m already exists: {save_file}')
+        logging.warning(f'File for {domain} monthly averages already exists: {save_file}')
     else:
         ds = xr.open_dataset(mlink)
-        ds = ds.sel(time=slice(start_date, end_date), height=height)
-        ds = ds[["U", "V"]]
+        ds = ds.sel(time=slice(start_date, end_date), height=160)
+        #ds = ds.sel(time=test_date_range, height=160)
+        ds = ds[["U", "V", "U10", "V10"]]
 
         months = np.unique(ds['time.month'])
 
@@ -65,7 +67,7 @@ def main(args):
         data = {
             "coords": {
                 "month": {"dims": "month", "data": np.array(months, dtype='int32')},
-                "height": {"dims": (), "data": np.array(height, dtype='int32')},
+                "height": {"dims": "height", "data": np.array(heights, dtype='int32')},
                 "XLAT": {"dims": ('south_north', 'west_east'), "data": ds.XLAT.values},
                 "XLONG": {"dims": ('south_north', 'west_east'), "data": ds.XLONG.values}
             },
@@ -79,52 +81,57 @@ def main(args):
         variables = ['ws_monthly_avg', 'ws_monthly_variance']
         for v in variables:
             data["data_vars"][v] = dict()
-            data["data_vars"][v]["data"] = np.empty((len(months), np.shape(ds.XLAT)[0], np.shape(ds.XLAT)[1]), dtype='float32')
+            data["data_vars"][v]["data"] = np.empty((len(months), len(heights), np.shape(ds.XLAT)[0], np.shape(ds.XLAT)[1]), dtype='float32')
             data["data_vars"][v]["data"][:] = np.nan
-            data["data_vars"][v]["dims"] = ('month', 'south_north', 'west_east')
+            data["data_vars"][v]["dims"] = ('month', 'height', 'south_north', 'west_east')
             data["data_vars"][v]["attrs"] = dict()
 
         # add attrs for lat/lon
         latlonvars = ['XLONG', 'XLAT']
         for llv in latlonvars:
-            data["coords"][llv]["attrs"] = dict()
             data["coords"][llv]["attrs"] = ds[llv].attrs
 
-        logging.info(f'Calculating variables {variables} for {domain} {height}m: {start_str} to {end_str}')
+        logging.info(f'Calculating variables {variables} for {domain} monthly averages: {start_str} to {end_str}')
 
         for i, month in enumerate(months):
-            # calculate monthly-averaged windspeed
+            # calculate monthly-averaged windspeed at 10m and 160m
             month_idx = ds['time.month'].values == month
-            u_month = ds.U[month_idx]
-            v_month = ds.V[month_idx]
-            ws_month = cf.wind_uv_to_spd(u_month, v_month)
-            ws_monthly = ws_month.mean(dim='time')
-            years = np.unique(ds['time.year'].values[month_idx]).tolist()
+            for ih, height in enumerate(heights):
+                if height == 10:
+                    u_month = ds.U10[month_idx]
+                    v_month = ds.V10[month_idx]
+                else:
+                    u_month = ds.U[month_idx]
+                    v_month = ds.V[month_idx]
+                ws_month = cf.wind_uv_to_spd(u_month, v_month)
+                ws_monthly = ws_month.mean(dim='time')
+                years = np.unique(ds['time.year'].values[month_idx]).tolist()
 
-            # append monthly-averaged data to data dictionary
-            data["data_vars"]['ws_monthly_avg']['data'][i] = ws_monthly
-            data["data_vars"]['ws_monthly_avg']["attrs"]["units"] = 'm s-1'
-            data["data_vars"]['ws_monthly_avg']["attrs"]["long_name"] = 'Monthly Averaged Wind Speed'
-            data["data_vars"]['ws_monthly_avg']["attrs"]["comment"] = f'Average of wind speeds for each month for ' \
-                                                                      f'years: {years}'
+                # append monthly-averaged data to data dictionary
+                data["data_vars"]['ws_monthly_avg']['data'][i][ih] = ws_monthly
+                data["data_vars"]['ws_monthly_avg']["attrs"]["units"] = 'm s-1'
+                data["data_vars"]['ws_monthly_avg']["attrs"]["long_name"] = 'Monthly Averaged Wind Speed'
+                data["data_vars"]['ws_monthly_avg']["attrs"]["comment"] = f'Average of wind speeds for each month for ' \
+                                                                          f'years: {years}'
 
-            # # calculate monthly variance (taking wind speed magnitude and direction into account)
-            # u_month_variance = u_month.var(dim='time')
-            # v_month_variance = v_month.var(dim='time')
-            # rms = np.sqrt((u_month_variance + v_month_variance))
-            #
-            # # append variance to data dictionary
-            # data["data_vars"]['rms_monthly']['data'][i] = rms
-            # data["data_vars"]['rms_monthly']["attrs"]["comment"] = f'Measure of variance for wind speed for each month for ' \
-            #                                                f'years: {years}, calculated as sqrt(u_variance + v_variance)'
+                # # calculate monthly variance (taking wind speed magnitude and direction into account)
+                # u_month_variance = u_month.var(dim='time')
+                # v_month_variance = v_month.var(dim='time')
+                # rms = np.sqrt((u_month_variance + v_month_variance))
+                #
+                # # append variance to data dictionary
+                # data["data_vars"]['rms_monthly']['data'][i] = rms
+                # data["data_vars"]['rms_monthly']["attrs"]["comment"] = f'Measure of variance for wind speed for each month for ' \
+                #                                                f'years: {years}, calculated as sqrt(u_variance + v_variance)'
 
-            # calculate monthly variance (just wind speed magnitude)
-            ws_monthly_variance = ws_month.var(dim='time')
+                # calculate monthly variance (just wind speed magnitude)
+                ws_monthly_variance = ws_month.var(dim='time')
 
-            # append variance to data dictionary
-            data["data_vars"]['ws_monthly_variance']['data'][i] = ws_monthly_variance
-            data["data_vars"]['ws_monthly_variance']["attrs"]["comment"] = f'Variance of wind speed magnitude for each ' \
-                                                                           f'month for years: {years}'
+                # append variance to data dictionary
+                data["data_vars"]['ws_monthly_variance']['data'][i][ih] = ws_monthly_variance
+                data["data_vars"]['ws_monthly_variance']["attrs"]["units"] = 'm2 s-2'
+                data["data_vars"]['ws_monthly_variance']["attrs"]["comment"] = f'Variance of wind speed magnitude for each ' \
+                                                                               f'month for years: {years}'
 
         outds = xr.Dataset.from_dict(data)
 
@@ -151,6 +158,9 @@ def main(args):
 
         outds = outds.assign_attrs(global_attributes)
 
+        # add attrs for height
+        outds.height.attrs = ds.height.attrs
+
         # Add compression to all variables
         encoding = {}
         for k in outds.data_vars:
@@ -158,10 +168,10 @@ def main(args):
 
         # save .nc file
         outds.to_netcdf(save_file, encoding=encoding, format='netCDF4', engine='netcdf4')
-        logging.info(f'Finished calculating monthly averages for {domain} {height}m: {start_str} to {end_str}')
+        logging.info(f'Finished calculating monthly averages for {domain} dataset, 10 and 160m: {start_str} to {end_str}')
         overall_start = pd.to_datetime(np.nanmin(ds.time.values)).strftime('%Y-%m-%dT%H:%M')
         overall_end = pd.to_datetime(np.nanmax(ds.time.values)).strftime('%Y-%m-%dT%H:%M')
-        logging.info(f'Data range summarized in {save_file}: {overall_start} to {overall_end}')
+        logging.info(f'Date range summarized in {save_file}: {overall_start} to {overall_end}')
 
 
 if __name__ == '__main__':
@@ -178,12 +188,6 @@ if __name__ == '__main__':
                             default='20221231',
                             type=str,
                             help='End Date in format YYYYMMDD')
-
-    arg_parser.add_argument('-z', '--height',
-                            dest='height',
-                            default=160,
-                            type=list,
-                            help='Height in meters')
 
     arg_parser.add_argument('-d', '--domain',
                             dest='domain',
