@@ -67,6 +67,7 @@ def main(args):
         data = {
             "coords": {
                 "month": {"dims": "month", "data": np.array(months, dtype='int32')},
+                "years": {"dims": "month", "data": np.array([], dtype='object')},
                 "height": {"dims": "height", "data": np.array(heights, dtype='int32')},
                 "XLAT": {"dims": ('south_north', 'west_east'), "data": ds.XLAT.values},
                 "XLONG": {"dims": ('south_north', 'west_east'), "data": ds.XLONG.values}
@@ -96,6 +97,8 @@ def main(args):
         for i, month in enumerate(months):
             # calculate monthly-averaged windspeed at 10m and 160m
             month_idx = ds['time.month'].values == month
+            years = ' '.join(str(x) for x in np.unique(ds['time.year'].values[month_idx]))
+            data['coords']['years']['data'] = np.append(data['coords']['years']['data'], years)
             for ih, height in enumerate(heights):
                 if height == 10:
                     u_month = ds.U10[month_idx]
@@ -105,14 +108,13 @@ def main(args):
                     v_month = ds.V[month_idx]
                 ws_month = cf.wind_uv_to_spd(u_month, v_month)
                 ws_monthly = ws_month.mean(dim='time')
-                years = np.unique(ds['time.year'].values[month_idx]).tolist()
 
                 # append monthly-averaged data to data dictionary
                 data["data_vars"]['ws_monthly_avg']['data'][i][ih] = ws_monthly
                 data["data_vars"]['ws_monthly_avg']["attrs"]["units"] = 'm s-1'
                 data["data_vars"]['ws_monthly_avg']["attrs"]["long_name"] = 'Monthly Averaged Wind Speed'
                 data["data_vars"]['ws_monthly_avg']["attrs"]["comment"] = f'Average of wind speeds for each month for ' \
-                                                                          f'years: {years}'
+                                                                          f'specified years'
 
                 # # calculate monthly variance (taking wind speed magnitude and direction into account)
                 # u_month_variance = u_month.var(dim='time')
@@ -131,7 +133,7 @@ def main(args):
                 data["data_vars"]['ws_monthly_variance']['data'][i][ih] = ws_monthly_variance
                 data["data_vars"]['ws_monthly_variance']["attrs"]["units"] = 'm2 s-2'
                 data["data_vars"]['ws_monthly_variance']["attrs"]["comment"] = f'Variance of wind speed magnitude for each ' \
-                                                                               f'month for years: {years}'
+                                                                               f'month for specified years'
 
         outds = xr.Dataset.from_dict(data)
 
@@ -158,8 +160,9 @@ def main(args):
 
         outds = outds.assign_attrs(global_attributes)
 
-        # add attrs for height
+        # add attrs for height and years
         outds.height.attrs = ds.height.attrs
+        outds.years.attrs = dict(comment='Years included in each monthly average')
 
         # Add compression to all variables
         encoding = {}
