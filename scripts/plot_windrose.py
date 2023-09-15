@@ -200,6 +200,7 @@ def main(args):
                 season = cf.season_mapping(np.unique(dst['time.season'])[0])
                 years = '-'.join(str(x) for x in np.unique(dst['time.year']))
                 title_dt = f'{season} {years}: {int(len(dst.time) / 24)} days'
+                save_dt = f'{sd.strftime("%Y%m%d")}_{ed.strftime("%Y%m%d")}'
             else:
                 title_dt = f'{sd.strftime("%Y-%m-%d")} to {ed.strftime("%Y-%m-%d")}: {int(len(dst.time)/24)} days'
                 save_dt = f'{sd.strftime("%Y%m%d")}_{ed.strftime("%Y%m%d")}'
