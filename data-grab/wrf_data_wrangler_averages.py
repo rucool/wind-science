@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 4/25/2023
-Last modified: Lori Garzio 9/13/2023
+Last modified: Lori Garzio 9/15/2023
 Grab U and V data at 10m and 160m from THREDDS for a user-defined time-range, calculate monthly averages and variance
 and export as NetCDF.
 """
@@ -79,7 +79,7 @@ def main(args):
             "data_vars": dict()
         }
 
-        variables = ['ws_monthly_avg', 'ws_monthly_variance']
+        variables = ['ws_monthly_avg', 'ws_monthly_stdev']
         for v in variables:
             data["data_vars"][v] = dict()
             data["data_vars"][v]["data"] = np.empty((len(months), len(heights), np.shape(ds.XLAT)[0], np.shape(ds.XLAT)[1]), dtype='float32')
@@ -113,7 +113,8 @@ def main(args):
                 data["data_vars"]['ws_monthly_avg']['data'][i][ih] = ws_monthly
                 data["data_vars"]['ws_monthly_avg']["attrs"]["units"] = 'm s-1'
                 data["data_vars"]['ws_monthly_avg']["attrs"]["long_name"] = 'Monthly Averaged Wind Speed'
-                data["data_vars"]['ws_monthly_avg']["attrs"]["comment"] = f'Average of wind speeds for each month for ' \
+                data["data_vars"]['ws_monthly_avg']["attrs"]["comment"] = f'Average of RU-WRF modeled wind speed ' \
+                                                                          f'magnitude for each month for ' \
                                                                           f'specified years'
 
                 # # calculate monthly variance (taking wind speed magnitude and direction into account)
@@ -126,14 +127,16 @@ def main(args):
                 # data["data_vars"]['rms_monthly']["attrs"]["comment"] = f'Measure of variance for wind speed for each month for ' \
                 #                                                f'years: {years}, calculated as sqrt(u_variance + v_variance)'
 
-                # calculate monthly variance (just wind speed magnitude)
+                # calculate monthly stdev (just wind speed magnitude)
                 ws_monthly_variance = ws_month.var(dim='time')
+                ws_monthly_stdev = np.sqrt(ws_monthly_variance)
 
                 # append variance to data dictionary
-                data["data_vars"]['ws_monthly_variance']['data'][i][ih] = ws_monthly_variance
-                data["data_vars"]['ws_monthly_variance']["attrs"]["units"] = 'm2 s-2'
-                data["data_vars"]['ws_monthly_variance']["attrs"]["comment"] = f'Variance of wind speed magnitude for each ' \
-                                                                               f'month for specified years'
+                data["data_vars"]['ws_monthly_stdev']['data'][i][ih] = ws_monthly_stdev
+                data["data_vars"]['ws_monthly_stdev']["attrs"]["units"] = 'm2 s-2'
+                data["data_vars"]['ws_monthly_stdev']["attrs"]["comment"] = f'Standard deviation of RU-WRF modeled wind ' \
+                                                                            f'speed magnitude for each ' \
+                                                                            f'month for specified years'
 
         outds = xr.Dataset.from_dict(data)
 
@@ -143,8 +146,8 @@ def main(args):
         time_start = pd.to_datetime(np.nanmin(ds.time.values)).strftime(datetime_format)
         time_end = pd.to_datetime(np.nanmax(ds.time.values)).strftime(datetime_format)
 
-        ga_comment = f'Summarized data from RU-WRF dataset. Average and variance of wind speeds for each month for ' \
-                     f'multiple years spanning: {start_str} to {end_str}'
+        ga_comment = f'Summarized data from RU-WRF dataset. Average and standard deviation of wind speed magnitude ' \
+                     f'for each month for multiple years spanning: {start_str} to {end_str}'
 
         global_attributes = OrderedDict([
             ('date_created', created),
@@ -153,7 +156,25 @@ def main(args):
             ('time_coverage_end', time_end),
             ('comment', ga_comment),
             ('data_source', mlink),
-            ('model_version', 'v4.1')
+            ('model_version', 'RU-WRF v4.1'),
+            ('creator_url', ds.creator_url),
+            ('creator_name', ds.creator_name),
+            ('creator_type', ds.creator_type),
+            ('creator_email', ds.creator_email),
+            ('creator_institution', ds.creator_institution),
+            ('institution', ds.institution),
+            ('acknowledgement', ds.acknowledgement),
+            ('project', ds.project),
+            ('geospatial_lat_min', ds.geospatial_lat_min),
+            ('geospatial_lat_max', ds.geospatial_lat_max),
+            ('geospatial_lon_min', ds.geospatial_lon_min),
+            ('geospatial_lon_max', ds.geospatial_lon_max),
+            ('geospatial_lat_units', ds.geospatial_lat_units),
+            ('geospatial_lon_units', ds.geospatial_lon_units),
+            ('contributor_name', ds.contributor_name),
+            ('contributor_role', ds.contributor_role),
+            ('references', 'https://rucool.marine.rutgers.edu/research/offshore-wind/')
+
         ])
 
         global_attributes.update(outds.attrs)
