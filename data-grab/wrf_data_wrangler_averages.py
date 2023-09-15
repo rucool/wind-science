@@ -3,8 +3,8 @@
 """
 Author: Lori Garzio on 4/25/2023
 Last modified: Lori Garzio 9/15/2023
-Grab U and V data at 10m and 160m from THREDDS for a user-defined time-range, calculate monthly averages and variance
-and export as NetCDF.
+Grab U and V data at 10m and 160m from THREDDS for a user-defined time-range, calculate monthly averages and standard
+deviation and export as NetCDF.
 """
 
 import argparse
