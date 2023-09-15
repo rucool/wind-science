@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 3/13/2023
-Last modified: 9/13/2023
+Last modified: 9/15/2023
 Creates wind rose plots from WRF data at user-defined time intervals, heights, and locations.
 """
 
@@ -196,6 +196,10 @@ def main(args):
             if interval == 'monthly':
                 title_dt = f'{sd.strftime("%b %Y")}: {int(len(dst.time)/24)} days'
                 save_dt = sd.strftime("%Y%m%d")
+            elif interval == 'seasonal':
+                season = cf.season_mapping(np.unique(dst['time.season'])[0])
+                years = '-'.join(str(x) for x in np.unique(dst['time.year']))
+                title_dt = f'{season} {years}: {int(len(dst.time) / 24)} days'
             else:
                 title_dt = f'{sd.strftime("%Y-%m-%d")} to {ed.strftime("%Y-%m-%d")}: {int(len(dst.time)/24)} days'
                 save_dt = f'{sd.strftime("%Y%m%d")}_{ed.strftime("%Y%m%d")}'
