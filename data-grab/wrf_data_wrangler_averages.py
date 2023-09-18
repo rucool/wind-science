@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 4/25/2023
-Last modified: Lori Garzio 9/15/2023
+Last modified: Lori Garzio 9/18/2023
 Grab U and V data at 10m and 160m from THREDDS for a user-defined time-range, calculate monthly averages and standard
 deviation and export as NetCDF.
 """
@@ -133,7 +133,7 @@ def main(args):
 
                 # append variance to data dictionary
                 data["data_vars"]['ws_monthly_stdev']['data'][i][ih] = ws_monthly_stdev
-                data["data_vars"]['ws_monthly_stdev']["attrs"]["units"] = 'm2 s-2'
+                data["data_vars"]['ws_monthly_stdev']["attrs"]["units"] = 'm s-1'
                 data["data_vars"]['ws_monthly_stdev']["attrs"]["comment"] = f'Standard deviation of RU-WRF modeled wind ' \
                                                                             f'speed magnitude for each ' \
                                                                             f'month for specified years'
