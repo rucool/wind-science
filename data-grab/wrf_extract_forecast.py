@@ -39,6 +39,8 @@ def main(fd, dom, loc):
     i, j = np.unravel_index(a.argmin(), a.shape)
     ds = ds.isel(south_north=i, west_east=j)
 
+    return ds
+
 
 if __name__ == '__main__':
     forecast_date = '20181201'
