@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 3/13/2023
-Last modified: 6/21/2023
+Last modified: 9/15/2023
 Creates wind rose plots from WRF data at user-defined time intervals, heights, and locations.
 """
 
@@ -87,22 +87,36 @@ def main(args):
     height = args.height
     domain = args.domain
     plot_power = args.plot_power
+    subset_dir = args.subset_dir
     save_dir = args.save_dir
 
     start_date = dt.datetime.strptime(start_str, '%Y%m%d')
     end_date = dt.datetime.strptime(end_str, '%Y%m%d') + dt.timedelta(hours=23)
 
     if domain == '3km':
-        mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
+        if subset_dir:
+            mlink = f'/home/coolgroup/bpu/wrf/data/wrf_nc/wea_centroids/3km/{location}_160_3km.nc'
+            height = 160  # height must be 160m if using subset files
+        else:
+            mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_3km_processed/WRF_4.1_3km_Processed_Dataset_Best'
         title_label = '3km'
     elif domain == '1km_wf2km':
-        mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_1km_wf2km_processed/WRF_4.1_1km_with_Wind_Farm_Processed_Dataset_Best'
+        if subset_dir:
+            ValueError('subset_dir must be set to False when plotting 1km_wf2km data')
+        else:
+            mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_1km_wf2km_processed/WRF_4.1_1km_with_Wind_Farm_Processed_Dataset_Best'
         title_label = '1km Wind Farm'
     elif domain == '1km_ctrl':
-        mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_1km_ctrl_processed/WRF_4.1_1km_Control_Processed_Dataset_Best'
+        if subset_dir:
+            ValueError('subset_dir must be set to False when plotting 1km_ctrl data')
+        else:
+            mlink = 'https://tds.marine.rutgers.edu/thredds/dodsC/cool/ruwrf/wrf_4_1_1km_ctrl_processed/WRF_4.1_1km_Control_Processed_Dataset_Best'
         title_label = '1km Control'
     else:
         raise ValueError('Invalid domain specified')
+
+    ds = xr.open_dataset(mlink)
+    ds = ds.sel(time=slice(start_date, end_date))
 
     # locations of lease area centroids
     location_csv = '/home/wrfadmin/toolboxes/wind-science/files/lease_centroids.csv'
@@ -111,9 +125,6 @@ def main(args):
     df = loc_df[loc_df['lease_code'] == location]
     if len(df) == 0:
         raise ValueError('Please provide a valid lease code, found in ./files/lease_centroids.csv (i.e. "OCS-A0512")')
-
-    ds = xr.open_dataset(mlink)
-    ds = ds.sel(time=slice(start_date, end_date))
 
     # break up date range into the plotting interval specified
     if interval == 'none':
@@ -125,12 +136,18 @@ def main(args):
         sb_times = sb_times[np.logical_and(sb_times >= start_date, sb_times <= end_date)]
         nosb_times = nosb_times[np.logical_and(nosb_times >= start_date, nosb_times <= end_date)]
         intervals = [sb_times, nosb_times]
-        save_dir = os.path.join(save_dir, location, interval)
+    elif interval == 'summers':
+        months = ds['time.month']
+        intervals = list(np.where((months == 6) | (months == 7) | (months == 8)))
+    elif interval == 'months':
+        intervals = []
+        for month in np.unique(ds['time.month']):
+            intervals.append(list(np.where(ds['time.month'] == month)[0]))
     else:
         test = ds.time
         intervals = cf.daterange_interval(interval, test)
-        save_dir = os.path.join(save_dir, location, interval)
 
+    save_dir = os.path.join(save_dir, location, interval)
     os.makedirs(save_dir, exist_ok=True)
 
     for i_intvl, intvl in enumerate(intervals):
@@ -153,6 +170,19 @@ def main(args):
             else:
                 title_dt = f'{ttl_version}\n{start_date.strftime("%Y-%m-%d")} to {end_date.strftime("%Y-%m-%d")}'
                 save_dt = f'{start_date.strftime("%Y%m%d")}_{end_date.strftime("%Y%m%d")}_{version}'
+        elif interval == 'summers':
+            dst = ds.isel(time=intvl)
+            min_year = np.nanmin(dst['time.year'])
+            max_year = np.nanmax(dst['time.year'])
+            title_dt = f'June-July-Aug {str(min_year)}-{str(max_year)}'
+            save_dt = f'summers{str(min_year)}_{str(max_year)}'
+        elif interval == 'months':
+            dst = ds.isel(time=intvl)
+            years = '-'.join(str(x) for x in np.unique(dst['time.year']).tolist())
+            month_num = np.unique(dst['time.month'])[0]
+            month_name = pd.to_datetime(dst.time.values[0]).strftime("%b")
+            title_dt = f'{month_name} {years}'
+            save_dt = f'months_{str(month_num).zfill(2)}_{month_name}_{years}'
         else:
             sd = pd.to_datetime(intvl[0])
             ed = pd.to_datetime(intvl[1])
@@ -164,32 +194,45 @@ def main(args):
 
             # define title and save names
             if interval == 'monthly':
-                title_dt = sd.strftime("%b %Y")
+                title_dt = f'{sd.strftime("%b %Y")}: {int(len(dst.time)/24)} days'
                 save_dt = sd.strftime("%Y%m%d")
+            elif interval == 'seasonal':
+                season = cf.season_mapping(np.unique(dst['time.season'])[0])
+                years = '-'.join(str(x) for x in np.unique(dst['time.year']))
+                title_dt = f'{season} {years}: {int(len(dst.time) / 24)} days'
+                save_dt = f'{sd.strftime("%Y%m%d")}_{ed.strftime("%Y%m%d")}'
             else:
-                title_dt = f'{sd.strftime("%Y-%m-%d")} to {ed.strftime("%Y-%m-%d")}'
+                title_dt = f'{sd.strftime("%Y-%m-%d")} to {ed.strftime("%Y-%m-%d")}: {int(len(dst.time)/24)} days'
                 save_dt = f'{sd.strftime("%Y%m%d")}_{ed.strftime("%Y%m%d")}'
 
-        lat = dst['XLAT']
-        lon = dst['XLONG']
-
-        if height == 10:
-            u = dst['U10']
-            v = dst['V10']
+        if np.logical_and(subset_dir, domain == '3km'):  # if using the 3km subset file that's already specific to a centroid
+            usub = dst.U
+            vsub = dst.V
         else:
-            u = dst.sel(height=height)['U']
-            v = dst.sel(height=height)['V']
+            lat = dst['XLAT']
+            lon = dst['XLONG']
 
-        # Find the closest model point to location
-        # calculate the sum of the absolute value distance between the model location and buoy location
-        a = abs(lat - df.lat.values[0]) + abs(lon - df.long.values[0])
+            if height == 10:
+                u = dst['U10']
+                v = dst['V10']
+            else:
+                try:
+                    u = dst.sel(height=height)['U']
+                    v = dst.sel(height=height)['V']
+                except KeyError:  # the file only has one height (160m)
+                    u = dst.U
+                    v = dst.V
 
-        # find the indices of the minimum value in the array calculated above
-        i, j = np.unravel_index(a.argmin(), a.shape)
+            # Find the closest model point to location
+            # calculate the sum of the absolute value distance between the model location and buoy location
+            a = abs(lat - df.lat.values[0]) + abs(lon - df.long.values[0])
 
-        # grab the data at that location
-        usub = u[:, i, j]
-        vsub = v[:, i, j]
+            # find the indices of the minimum value in the array calculated above
+            i, j = np.unravel_index(a.argmin(), a.shape)
+
+            # grab the data at that location
+            usub = u[:, i, j]
+            vsub = v[:, i, j]
 
         ax = new_axes()
 
@@ -239,10 +282,13 @@ if __name__ == '__main__':
                             dest='interval',
                             default='monthly',
                             type=str,
-                            choices=['monthly', 'seasonal', 'none', 'seabreeze'],
+                            choices=['monthly', 'seasonal', 'none', 'seabreeze', 'summers', 'months'],
                             help='Interval into which the time range provided is divided. If "none", the entire time '
                                  'range provided is grouped into one windrose. If "seabreeze" the entire time range'
-                                 'provided is broken into seabreeze and non-seabreeze days.')
+                                 'provided is broken into seabreeze and non-seabreeze days. If "summers" the entire'
+                                 'time range provided is subset for summers only (June-July-Aug). If "months" the '
+                                 'entire time range provided is broken into months and multiple years are included '
+                                 'in the same month plot.')
 
     arg_parser.add_argument('-location',
                             dest='location',
@@ -270,6 +316,14 @@ if __name__ == '__main__':
                             type=bool,
                             choices=[True, False],
                             help='Option to plot power roses, default is False')
+
+    arg_parser.add_argument('-subset_dir',
+                            default=False,
+                            type=bool,
+                            choices=[True, False],
+                            help='Option to use a previously-generated subset file in '
+                                 '/home/coolgroup/bpu/wrf/data/wrf_nc/wea_centroids/3km. If set to True, height must '
+                                 'be 160m and domain must be 3km. Default is False')
 
     arg_parser.add_argument('-save_dir',
                             default='/www/web/rucool/windenergy/ru-wrf/images/windrose',

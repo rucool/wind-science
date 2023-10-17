@@ -1,0 +1,8 @@
+AE - Atlantic City Electric, 2 companies AECO and VMEU
+JC - CP&L
+PS - PSE&G
+RECO - Rockland Electric Company
+
+from https://dataminer2.pjm.com/feed/hrl_load_metered
+
+for seabreezes, either just use AE or combine them all

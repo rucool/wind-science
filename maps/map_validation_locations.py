@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 6/28/2022
-Last modified: 1/18/2023
+Last modified: 07/17/2023 - james kim
 Plot surface map of the WRF validation locations
 """
 
@@ -23,21 +23,30 @@ def add_validation_points(axis, text, longitude, latitude, toffset):
 
     text_lon = longitude + lon_offset
     text_lat = latitude + lat_offset
-    axis.text(text_lon, text_lat, text, fontsize=10, transform=ccrs.PlateCarree(), zorder=20)
+    #axis.text(text_lon, text_lat, text, fontsize=10, transform=ccrs.PlateCarree(), zorder=20)
+    axis.text(text_lon, text_lat, text, fontsize=10, transform=ccrs.PlateCarree(), fontweight='bold', zorder=20)
 
 
-def main(save_file, shape_files, ndbc, zoom):
+
+def main(save_file, shape_files, ndbc, zoom,zoom2):
     if zoom:
-        extent = [-74.9, -72.3, 38.7, 40.3]  # zoomed in to WEA
+        extent = [-74.9, -72.3, 38.7, 40.3]  # zoomed in to WEA 
+    if zoom2:
+        extent = [-75.5,-70.2,38.4,41.5]   # BIG MAP
     else:
-        extent = [-75.5, -72, 38.4, 40.6]
+        extent = [-75.5, -72, 38.4, 40.6] # WEA  
+        
 
     # set up the map
     fig, ax = cplt.create(extent)
 
     if shape_files:
-        lease = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/BOEM-Renewable-Energy-Shapefiles_11_2_2022/Wind_Lease_Outlines_11_2_2022.shp'
-        plan = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/BOEM-Renewable-Energy-Shapefiles_11_2_2022/Wind_Planning_Area_Outlines_11_2_2022.shp'
+        #lease = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/BOEM-Renewable-Energy-Shapefiles_11_2_2022/Wind_Lease_Outlines_11_2_2022.shp'
+        #plan = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/BOEM-Renewable-Energy-Shapefiles_11_2_2022/Wind_Planning_Area_Outlines_11_2_2022.shp'  #find -name Wind_Lease_Outlines_11_2_2022.shp
+        lease = '/users/jameskim/Documents/rucool/bpu/maps/BOEM_Renewable_Energy_Shapefiles_1/Wind_Lease_Outlines_2_2023.shp'
+        plan = '/users/jameskim/Documents/rucool/bpu/maps/BOEM_Renewable_Energy_Shapefiles_1/BOEM_Wind_Planning_Areas_Outlines_04_2023.shp'
+
+
         kwargs = dict()
         kwargs['edgecolor'] = 'dimgray'
         pf.map_add_boem_outlines(ax, lease, **kwargs)
@@ -45,19 +54,21 @@ def main(save_file, shape_files, ndbc, zoom):
         kwargs['edgecolor'] = 'lightgray'
         pf.map_add_boem_outlines(ax, plan, **kwargs)
 
-    df = pd.read_csv('/Users/garzio/Documents/repo/rucool/wind-science/files/wrf_validation_points.csv')
+    df = pd.read_csv('/users/jameskim/Documents/rucool/Repositories/wind-science/files/wrf_validation_points.csv') #/Users/garzio/Documents/repo/rucool/wind-science/files/wrf_validation_points.csv
 
     for i, row in df.iterrows():
         if row['name'] == 'RUOYC':
             continue
         if zoom:
             offset = ast.literal_eval(row['text_offset_zoom'])
+        if zoom2:
+            offset = ast.literal_eval(row['text_offset_zoomlarge'])
         else:
             offset = ast.literal_eval(row['text_offset'])
         add_validation_points(ax, row['name'], row['longitude'], row['latitude'], offset)
 
     if ndbc:
-        df = pd.read_csv('/Users/garzio/Documents/repo/rucool/wind-science/files/ndbc_buoys.csv')
+        df = pd.read_csv('/users/jameskim/Documents/rucool/Repositories/wind-science/files/ndbc_buoys.csv') #/Users/garzio/Documents/repo/rucool/wind-science/files/ndbc_buoys.csv
         for i, row in df.iterrows():
             if zoom:
                 offset = ast.literal_eval(row['text_offset_zoom'])
@@ -70,8 +81,9 @@ def main(save_file, shape_files, ndbc, zoom):
 
 
 if __name__ == '__main__':
-    savefile = '/Users/garzio/Documents/rucool/bpu/wrf/wrf_validation_points_20230118.png'
+    savefile = '/Users/jameskim/Documents/rucool/bpu/maps/wrf_validation_points_20230118.png' # /Users/garzio/Documents/rucool/bpu/wrf/wrf_validation_points_20230118.png
     shpfiles = True  # True False
     add_ndbc = False  # True False
-    zoom_wea = True
-    main(savefile, shpfiles, add_ndbc, zoom_wea)
+    zoom_wea = False
+    zoom_large = True
+    main(savefile, shpfiles, add_ndbc, zoom_wea,zoom_large)

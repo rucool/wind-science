@@ -51,6 +51,21 @@ def return_seabreeze_datetimes(csvfile='/home/wrfadmin/toolboxes/wind-science/fi
     return sb_datetimes, nosb_datetimes
 
 
+def season_mapping(season_str):
+    if season_str == 'DJF':
+        season = 'Winter'
+    elif season_str == 'MAM':
+        season = 'Spring'
+    elif season_str == 'JJA':
+        season = 'Summer'
+    elif season_str == 'SON':
+        season = 'Fall'
+    else:
+        raise ValueError(f'Invalid season string provided: {season_str}')
+
+    return season
+
+
 def setup_logger(name, loglevel, logfile):
     logger = logging.getLogger(name)
 
@@ -161,6 +176,7 @@ def assign_upwelling(data, upwelling_file, satellite):
     data=data[clms]
 
     return data
+
 
 def assign_seabreeze_days(data, seabreeze_file):
     """
