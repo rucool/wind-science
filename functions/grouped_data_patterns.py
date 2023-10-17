@@ -79,18 +79,21 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
             print('Can only accept three group types. Exiting.')
             return 0
     
+    if 'season' in group:
+        df.loc[df['month']==12, 'year'] +=1
+
     if csvFile and group:
         all_vars = group.copy()
         all_vars.append(dv)
         stats = df[all_vars].groupby(group).describe()
         if dv=='power':
             sums = df[all_vars].groupby(group).sum()
-            stats['total'] = sums['power']
+            stats[f'total power ({unit_labels["power"]})'] = sums['power']
         stats.to_csv(csvFile)
     
     df['doy'] = df['time'].dt.dayofyear
     df.loc[df['month']==12, 'doy'] -= 365
-    df.loc[df['month']==12, 'year'] += 1
+    # df.loc[df['month']==12, 'year'] += 1
 
     if (boxplotFile or returnbpax) and group:
         order_vars = []
@@ -228,6 +231,8 @@ def main(df, dv='speed', group=None, max_power=15000, boxplotFile=None, heatmapF
 
     if heatmapFile or returnhmax:
         plt.rcParams.update({'font.size': 24}) 
+        if len(ttl.split('\n')[0])>50:
+            plt.rcParams.update({'font.size': 18}) 
         doy_ticks = pd.DataFrame(np.append(12,range(1,12)),columns=['month'])
         doy_ticks['day'] = 15
         doy_ticks['year'] = 2011
