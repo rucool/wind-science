@@ -66,6 +66,7 @@ def main(args):
     data['time']=pd.to_datetime(data.index)
     data['year'] = data['time'].dt.year
     data['month'] = data['time'].dt.month
+    data['hour'] = data['time'].dt.hour
     data['season'] = np.nan
     data.loc[data['month']==12, 'season'] = 'winter'
     data.loc[data['month']<=2, 'season'] = 'winter'
@@ -99,7 +100,7 @@ def main(args):
     lease = list(np.unique(data['lease']))[0]
 
     if len(list(np.unique(data['lease_code'])))==1:
-        ttl = f'{lease}: \n {t0ttl} to {t1ttl}'
+        ttl = f"{', '.join(list(np.unique(data['lease_code'])))}: \n {t0ttl} to {t1ttl}"
     else:
         ttl=f'{t0ttl} to {t1ttl}'
 
