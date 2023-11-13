@@ -75,7 +75,7 @@ def main(args):
         # find the corresponding control file
       
         fname_ctrl = os.path.join(file_dir, control_dir, ymd, f)
-
+        
         ds = xr.open_dataset(fname)
         ds_ctrl = xr.open_dataset(fname_ctrl)
         tm = pd.to_datetime(ds.Time.values[0])
@@ -198,15 +198,24 @@ def main(args):
                        scale=30, width=.002, headlength=4, transform=ccrs.PlateCarree())
 
             # add turbine locations to wf and diff
+            if control_dir = "1km_wf2km_nyb:
+                ax1.scatter(turb_csv.lon, turb_csv.lat, s=.5, color='k', transform=ccrs.PlateCarree())
             ax2.scatter(turb_csv.lon, turb_csv.lat, s=.5, color='k', transform=ccrs.PlateCarree())
             ax3.scatter(turb_csv.lon, turb_csv.lat, s=.5, color='k', transform=ccrs.PlateCarree())
+            
 
             ax1.set_xticklabels(ax1.get_xticklabels(), rotation=25, ha='center')
             ax2.set_xticklabels(ax2.get_xticklabels(), rotation=25, ha='center')
             ax3.set_xticklabels(ax3.get_xticklabels(), rotation=25, ha='center')
 
-            ax1.set_title(f'Control (Power: {cumulative_power_ctrl} GW)', y=1.02)
-            ax2.set_title(f'Wind Farm (Power: {cumulative_power} GW)', y=1.02)
+            if control_dir = "1km_wf2km_nyb":
+                ax1.set_title(f'Upwelling (Power: {cumulative_power_ctrl} GW)', y=1.02)
+            else:    
+                ax1.set_title(f'Control (Power: {cumulative_power_ctrl} GW)', y=1.02)
+            if expt == '1km_wf2km_nyb_modsst':
+                ax2.set_title(f'Upwelling Removed (Power: {cumulative_power} GW)', y=1.02)
+            else:
+                ax2.set_title(f'Wind Farm (Power: {cumulative_power} GW)', y=1.02)
             ax3.set_title(f'Wind Speed Difference', y=1.02)
             plt.savefig(save_file, dpi=200)
             plt.close()
