@@ -198,7 +198,7 @@ def main(args):
                        scale=30, width=.002, headlength=4, transform=ccrs.PlateCarree())
 
             # add turbine locations to wf and diff
-            if control_dir = "1km_wf2km_nyb":
+            if control_dir == "1km_wf2km_nyb":
                 ax1.scatter(turb_csv.lon, turb_csv.lat, s=.5, color='k', transform=ccrs.PlateCarree())
             ax2.scatter(turb_csv.lon, turb_csv.lat, s=.5, color='k', transform=ccrs.PlateCarree())
             ax3.scatter(turb_csv.lon, turb_csv.lat, s=.5, color='k', transform=ccrs.PlateCarree())
@@ -208,7 +208,7 @@ def main(args):
             ax2.set_xticklabels(ax2.get_xticklabels(), rotation=25, ha='center')
             ax3.set_xticklabels(ax3.get_xticklabels(), rotation=25, ha='center')
 
-            if control_dir = "1km_wf2km_nyb":
+            if control_dir == "1km_wf2km_nyb":
                 ax1.set_title(f'Upwelling (Power: {cumulative_power_ctrl} GW)', y=1.02)
             else:    
                 ax1.set_title(f'Control (Power: {cumulative_power_ctrl} GW)', y=1.02)
