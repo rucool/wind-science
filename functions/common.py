@@ -154,18 +154,22 @@ def wind_uv_to_spd(u, v):
     return wspd
 
 
-def assign_upwelling(data, upwelling_file, satellite):
+def assign_upwelling(data, upwelling_file, satellite, offset_day=True):
     """
     Assigns satellite-based upwelling to pandas dataframe
     data: pandas dataframe with 'time' column
     upwelling_file: name of csv file containing upwelling 
         (columns: Month, Day, Year, and column matching 'satellite' argument with 1=upwelling 0=no upwelling)
     satellite: name of column in upwelling_file that defines upwelling yes/no
+    offset_day: whether to add one day to the dates in upwelling_file before matching to data file (default: True)
+        accounts for fact that upwelling is determined by looking at maps from the day before that SST is used in the model
     """
 
     clms = list(data.columns)
     upwelling = pd.read_csv(upwelling_file)
     upwelling['date'] = pd.to_datetime(upwelling['Year'].astype(str)+'-'+upwelling['Month']+'-'+upwelling['Day'].astype(str))
+    if offset_day:
+        upwelling['date'] = upwelling['date'] + pd.Timedelta(days=1)
     data['date'] = pd.to_datetime(data['time'].dt.date)
     upwelling = upwelling[['date',satellite]]
     data = pd.merge(data, upwelling, on='date', how='left')

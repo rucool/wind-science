@@ -1,4 +1,98 @@
 Month,Day,Year,GOES,AVHRR,Notes
+May,31,2019,,0,added manually and assumed no upwelling
+June,1,2019,,0,Clouds
+June,2,2019,,0,Clouds
+June,3,2019,,0,Not quite. About 1.5 C cooler along the coast north of AC.
+June,4,2019,,0,Not quite. About 1.5 C cooler along the coast north of AC.
+June,5,2019,,0,Clouds
+June,6,2019,,0,Clouds
+June,7,2019,,0,Clouds
+June,8,2019,,0,Clouds
+June,9,2019,,0,Clouds
+June,10,2019,,0,Clouds
+June,11,2019,,0,No
+June,12,2019,,0,Clouds
+June,13,2019,,0,Clouds
+June,14,2019,,0,no
+June,15,2019,,0,Clouds
+June,16,2019,,0,Clouds
+June,17,2019,,0,Clouds
+June,18,2019,,0,Clouds
+June,19,2019,,0,no
+June,20,2019,,0,clouds
+June,21,2019,,1,YES. at 21:00. Bargegat Light and south. 5C Delta. hot day based on sst warm up
+June,22,2019,,1,Same - very hot day based on sst warm up
+June,23,2019,,0,"Gone. Crazy how fast this disappeared. Must have been a front, downwelling. "
+June,24,2019,,0,Nope
+June,25,2019,,0,Nada
+June,26,2019,,0,no
+June,27,2019,,0,"hint of something at baregat, but barely"
+June,28,2019,,0,no
+June,29,2019,,0,no
+June,30,2019,,1,Yes. Band from AC North. Very thin (4-5 km?). 5-6C delta. AC pier confirm
+July,1,2019,,1,Extremely thin band Tuckerton adn South. 5C Delta. 
+July,2,2019,,0,AC Pier suggests it dies. 
+July,3,2019,,0,clouds
+July,4,2019,,0,Gone
+July,5,2019,,0,clouds
+July,6,2019,,0,clouds
+July,7,2019,,0,clouds
+July,8,2019,,0,"No upwelling, but huson river plume very clear"
+July,9,2019,,1,Start. About 3 C Delta. AC and south. Hudson plume big!
+July,10,2019,,1,Clouds
+July,11,2019,,0,Clouds. AC buoy says no
+July,12,2019,,1,Clouds. AC buoy says YES
+July,13,2019,,1,Yes.  4-5C delta. Thin band
+July,14,2019,,1,Yes.  4-5C delta. Thin band. Strongest LBI
+July,15,2019,,1,"Yes. 5 C delta. Strogest LBI and AC, but whole coast. Not very wide"
+July,16,2019,,1,clouds
+July,17,2019,,1,5-6C delta. still thin line
+July,18,2019,,1,clouds
+July,19,2019,,1,clouds
+July,20,2019,,1,"Yes. Clearly gaining size, widening. 5-6C delta. "
+July,21,2019,,1,Ditto. Ocean VERY Hot. Must be very hot
+July,22,2019,,1,Upwelling center off Tuckerton
+July,23,2019,,1,clouds. ac pier cold (14.1 C)
+July,24,2019,,1,clouds
+July,25,2019,,1,"3 C delta. Still going, but south of Barnegat light"
+July,26,2019,,1,"3 C delta. Still going, but south of Barnegat light"
+July,27,2019,,0,"Only upwelling left is off Cape May, far south. so no"
+July,28,2019,,1,"At the end of the day, breaking surface. Barneget strong, but thin line while coast. 4C delta"
+July,29,2019,,1,Returning. Bargeat inlet strongest. 4-5C delta
+July,30,2019,,1,Clear image 5.5 C delta. widening. Nice upwelling
+July,31,2019,,1,Classic Upwelling Ceners. 6.5 C delta
+August,1,2019,,1,"Mostly cloudy, but 1 image semi. "
+August,2,2019,,1,clouds
+August,3,2019,,1,"Mostly cloudy, some breaks, looks weak"
+August,4,2019,,1,Still there kind of. but very weak. 3c delta
+August,5,2019,,0,gone
+August,6,2019,,0,gone
+August,7,2019,,0,perhaps a restart north of barnegat? Hudson river plume?
+August,8,2019,,1,Restarting 3.5C delta
+August,9,2019,,1,Entire coastline. 4C delta
+August,10,2019,,1,Cold water now Barnegat south. 18C. 7C delta
+August,11,2019,,1,A bit weaker. 4C delta
+August,12,2019,,1,Chilly night on land. Upwelling. 3.5C delta
+August,13,2019,,1,Clouds
+August,14,2019,,1,Clouds
+August,15,2019,,1,Clouds
+August,16,2019,,1,"Still there, but 3C delta. Not strong. All SST cooler."
+August,17,2019,,1,More like upwelling remnants now. 
+August,18,2019,,0,Bits and pieces throgh clouds. Upwelling over
+August,19,2019,,0,
+August,20,2019,,0,clouds
+August,21,2019,,0,clouds
+August,22,2019,,0,clouds
+August,23,2019,,0,clouds
+August,24,2019,,1,4C delta. Restarting 
+August,25,2019,,1,"Clouds, Arrival of a Noreaster I think. Major storm. Cold temps"
+August,26,2019,,0,clouds
+August,27,2019,,0,clouds
+August,28,2019,,0,clouds
+August,29,2019,,0,Clear image. Bight is completely mixed. Colder 10-10 miles offshore. 
+August,30,2019,,0,It is clear there was a mixing storm
+August,31,2019,,0,ditto
+May,31,2020,,0,added manually and assumed no upwelling
 June,1,2020,,0,
 June,2,2020,,0,
 June,3,2020,,0,
@@ -91,6 +185,7 @@ August,28,2020,,1,"weak thin line of upwelling, 2-3C?"
 August,29,2020,,1,"weak thin line of upwelling, 2-3C?"
 August,30,2020,,1,"weak thin line of upwelling, 2-3C?"
 August,31,2020,,1,"weak thin line of upwelling, 2-3C?"
+May,31,2021,,0,added manually and assumed no upwelling
 June,1,2021,,0,Warmer near shore than off. Weather data shows end of may was COLD! 46F ACY
 June,2,2021,,0,Clouds
 June,3,2021,,0,Clouds
@@ -183,6 +278,7 @@ August,28,2021,,0,clouds
 August,29,2021,,0,nope
 August,30,2021,,0,no
 August,31,2021,,0,no
+May,31,2022,,0,added manually and assumed no upwelling
 June,1,2022,,0,Nope
 June,2,2022,,0,no
 June,3,2022,,0,cloudy
