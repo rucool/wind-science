@@ -217,7 +217,7 @@ def plot_and_save_power_variation(ws_df_all, lease_site, start_year, end_year, s
     # Save the plot to the specified directory
     # Create the output directory based on arguments
     if season:
-        output_directory = os.path.join(output_directory, f'power{lease_site}/season')
+        output_directory = os.path.join(output_directory, f'power/{lease_site}/season')
     elif start_year == end_year and month:
         output_directory = os.path.join(output_directory, f'power/{lease_site}/months')
     elif start_year != end_year and month:
