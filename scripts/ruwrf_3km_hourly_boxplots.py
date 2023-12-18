@@ -302,7 +302,7 @@ def plot_and_save_wind_speed_variation(ws_df_all, lease_site, start_year, end_ye
     elif start_year == end_year and month:
         output_directory = os.path.join(output_directory, f'windspeed/{lease_site}/months')
     elif start_year != end_year and month:
-        output_directory = os.path.join(output_directory, f'windspeed{lease_site}/monthly')
+        output_directory = os.path.join(output_directory, f'windspeed/{lease_site}/monthly')
 
     # Create the output directory if it doesn't exist
     os.makedirs(output_directory, exist_ok=True)
