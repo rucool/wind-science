@@ -27,14 +27,13 @@ def get_month_dates(month=None, season=None, start_year=None, end_year=None):
 
         for year in range(start_year, end_year + 1):
             # Calculate the first day of the month
-             # Calculate the first day of the season
-            start_date = dt(year - 1, 12, 1) if 'winter' in season.lower() else dt(year, min(season_months), 1)
+            start_date = dt(year, month_number, 1)
 
-            # Calculate the last day of the season
-            if max(season_months) == 12:
-                end_date = dt(year, 2, 28)  # Assuming February has 28 days
+            # Calculate the last day of the month
+            if month_number == 12:
+                end_date = dt(year + 1, 1, 1) - timedelta(days=1)
             else:
-                end_date = dt(year, max(season_months) + 1, 1) - timedelta(days=1)
+                end_date = dt(year, month_number + 1, 1) - timedelta(days=1)
 
             # Format dates as strings
             start_date_str = start_date.strftime('%Y-%m-%d')
@@ -52,9 +51,9 @@ def get_month_dates(month=None, season=None, start_year=None, end_year=None):
     elif season:
         # Define seasons and their corresponding months
         seasons = {
-            'spring': range(3, 6),
-            'summer': range(6, 9),
-            'fall': range(9, 12),
+            'spring': [3, 4, 5],
+            'summer': [6, 7, 8],
+            'fall': [9, 10, 11],
             'winter': [12, 1, 2]
         }
 
@@ -63,10 +62,13 @@ def get_month_dates(month=None, season=None, start_year=None, end_year=None):
             season_months = seasons[season.lower()]
 
             # Calculate the first day of the season
-            start_date = dt(year, min(season_months), 1)
+            start_date = dt(year - 1, 12, 1) if 'winter' in season.lower() else dt(year, min(season_months), 1)
 
             # Calculate the last day of the season
-            end_date = dt(year, max(season_months) + 1, 1) - timedelta(days=1)
+            if max(season_months) == 12:
+                end_date = dt(year, 2, 28)  # Assuming February has 28 days
+            else:
+                end_date = dt(year, max(season_months) + 1, 1) - timedelta(days=1)
 
             # Format dates as strings
             start_date_str = start_date.strftime('%Y-%m-%d')
