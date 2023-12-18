@@ -91,8 +91,8 @@ def extract_coordinates(lease, lease_site):
 
     # Extract latitude and longitude
     if not selected_rows.empty:
-        latitude = selected_rows['long'].iloc[0]
-        longitude = selected_rows['lat'].iloc[0]
+        latitude = selected_rows['lat'].iloc[0]
+        longitude = selected_rows['long'].iloc[0]
         point = [latitude,longitude]
         return point
     else:
