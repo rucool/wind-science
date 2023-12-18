@@ -27,13 +27,14 @@ def get_month_dates(month=None, season=None, start_year=None, end_year=None):
 
         for year in range(start_year, end_year + 1):
             # Calculate the first day of the month
-            start_date = dt(year, month_number, 1)
+             # Calculate the first day of the season
+            start_date = dt(year - 1, 12, 1) if 'winter' in season.lower() else dt(year, min(season_months), 1)
 
-            # Calculate the last day of the month
-            if month_number == 12:
-                end_date = dt(year + 1, 1, 1) - timedelta(days=1)
+            # Calculate the last day of the season
+            if max(season_months) == 12:
+                end_date = dt(year, 2, 28)  # Assuming February has 28 days
             else:
-                end_date = dt(year, month_number + 1, 1) - timedelta(days=1)
+                end_date = dt(year, max(season_months) + 1, 1) - timedelta(days=1)
 
             # Format dates as strings
             start_date_str = start_date.strftime('%Y-%m-%d')
