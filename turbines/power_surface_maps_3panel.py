@@ -116,37 +116,31 @@ def main(args):
             cplt.create(extent, **kwargs)
 
             # set color maps and labels
-            cmap_power = plt.get_cmap('viridis')  # Choose an appropriate colormap for power
+            cmap_power = plt.get_cmap('viridis')
             levels_power = list(np.arange(power_min, power_max + power_interval, power_interval))
             color_label_power = 'Power (GW)'
 
-            cmap_diff = plt.get_cmap('RdBu_r')
-            cmap_diff.set_bad('white')
-            diff_lims = [-6, 6.5, .5]  # [min, max, interval] for difference plots
-            levels_diff = list(np.arange(diff_lims[0], diff_lims[1], diff_lims[2]))
-            levels_diff.remove(0.0)
-            cticks = list(np.arange(-6, 7, 1))
-            cticks.remove(0)
-            color_label_diff = 'Wind Speed Difference (m/s)'
-
             # plot control
             kwargs = dict()
-            kwargs['cmap'] = cmap_power  # Use the power colormap
+            kwargs['cmap'] = cmap_power
             kwargs['clab'] = color_label_power
             kwargs['levels'] = levels_power
             kwargs['extend'] = 'both'
             
-            # Assuming lon and lat are 2D arrays
-            lon_2d, lat_2d = np.meshgrid(lon, lat)
-            power_ctrl_2d = power_ctrl.reshape(lon_2d.shape)
-            
-            pf.plot_contourf(fig, ax1, lon_2d, lat_2d, power_ctrl_2d, **kwargs)
+            # Check if the sizes match before reshaping
+            if power_ctrl.size == lon.size:
+                power_ctrl_2d = power_ctrl.reshape(lon.shape)
+            else:
+                # Handle the case where sizes don't match (you might need to adjust this based on your data)
+                print("Error: Size mismatch between power_ctrl and lon/lat")
+                power_ctrl_2d = np.zeros_like(lon)  # Provide a placeholder, you may want to handle this differently
 
-            # plot difference (set to zeros since we're not plotting wind speed)
-            kwargs['cmap'] = cmap_diff
-            kwargs['clab'] = color_label_diff
-            kwargs['levels'] = levels_diff
-            kwargs['cbar_ticks'] = cticks
+            pf.plot_contourf(fig, ax1, lon, lat, power_ctrl_2d, **kwargs)
+
+            # plot wind farm
+            pf.plot_contourf(fig, ax2, lon, lat, diff, **kwargs)
+
+            # plot difference
             pf.plot_contourf(fig, ax3, lon, lat, diff, **kwargs)
 
             # add WEA outline
@@ -154,6 +148,7 @@ def main(args):
             kwargs = dict()
             kwargs['edgecolor'] = 'magenta'
             pf.map_add_boem_outlines(ax1, lease, **kwargs)
+            pf.map_add_boem_outlines(ax2, lease, **kwargs)
             pf.map_add_boem_outlines(ax3, lease, **kwargs)
 
             # add turbine locations to control and diff
@@ -165,8 +160,8 @@ def main(args):
             ax3.set_xticklabels(ax3.get_xticklabels(), rotation=25, ha='center')
 
             ax1.set_title(f'Control (Power: {cumulative_power_ctrl} GW)', y=1.02)
-            ax2.set_title(f'Wind Farm (Power: {cumulative_power_ctrl} GW)', y=1.02)
-            ax3.set_title(f'Power Difference', y=1.02)
+            ax2.set_title(f'Wind Farm (Power: 0 GW)', y=1.02)
+            ax3.set_title(f'Power Difference (Power: 0 GW)', y=1.02)
             plt.savefig(save_file, dpi=200)
             plt.close()
 
@@ -217,4 +212,3 @@ if __name__ == '__main__':
     parsed_args = arg_parser.parse_args()
     sys.exit(main(parsed_args))
 
-    ######
