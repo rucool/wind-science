@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 import sys
 import numpy as np
@@ -11,7 +13,6 @@ import cool_maps.plot as cplt
 import functions.common as cf
 import functions.plotting as pf
 plt.rcParams.update({'font.size': 12})  # all font sizes are 12 unless otherwise specified
-
 
 def main(args):
     ymd = args.ymd
@@ -49,9 +50,7 @@ def main(args):
     files = sorted(glob.glob(os.path.join(file_dir, expt, ymd, '*.nc')))
     
     # initialize totals for the 24 hour period
-    cumulative_power_total = 0
     cumulative_power_ctrl_total = 0
-    cumulative_power_diff_total = 0
     
     for fname in files:
         if fname.split('_')[-1] == 'H000.nc':
@@ -92,13 +91,13 @@ def main(args):
                 power_calc = np.interp(speed_ctrl[i, j].values, power_curve['Wind Speed'], power_curve['Power'])
                 power_ctrl = np.append(power_ctrl, power_calc)
 
-            # calculate total windfarm power generated in GW
+            # calculate total wind farm power generated in GW
             cumulative_power_ctrl = np.round(np.sum(power_ctrl) / 1000000, 2)
             
             # add each hour for the 24-hour total
             cumulative_power_ctrl_total += cumulative_power_ctrl
 
-            diff = speed_ctrl - speed_ctrl  # Since we're not plotting wind speed, set diff to zero
+            diff = np.zeros_like(speed_ctrl)  # Set diff to zeros since we're not plotting wind speed
 
             fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 8), sharey=True,
                                                 subplot_kw=dict(projection=ccrs.Mercator()))
@@ -136,7 +135,12 @@ def main(args):
             kwargs['clab'] = color_label_power
             kwargs['levels'] = levels_power
             kwargs['extend'] = 'both'
-            pf.plot_contourf(fig, ax1, lon, lat, power_ctrl, **kwargs)
+            
+            # Assuming lon and lat are 2D arrays
+            lon_2d, lat_2d = np.meshgrid(lon, lat)
+            power_ctrl_2d = power_ctrl.reshape(lon_2d.shape)
+            
+            pf.plot_contourf(fig, ax1, lon_2d, lat_2d, power_ctrl_2d, **kwargs)
 
             # plot difference (set to zeros since we're not plotting wind speed)
             kwargs['cmap'] = cmap_diff
