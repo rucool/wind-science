@@ -40,9 +40,9 @@ def process_date(args):
     control_dir = "1km_wf2km_nyb"  # Adjust this if needed
 
     # Load turbine CSV file
-    if expt == '1km_wf2km':
+    if expt == '1km_wf2km' or expt == '1km_wf2km_nyb_modsst':
         turb_csv = pd.read_csv(os.path.join(turb_csv_dir, 'turbine_locations_final.csv'))
-    elif expt == '1km_wf2km_nyb' or expt == '1km_wf2km_nyb_modsst':
+    elif expt == '1km_wf2km_nyb': # or expt == '1km_wf2km_nyb_modsst':
         turb_csv = pd.read_csv(os.path.join(turb_csv_dir, 'turbine_locations_final_nyb.csv'))
     else:
         raise ValueError(f'Invalid experiment provided: {expt}')
