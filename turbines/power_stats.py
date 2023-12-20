@@ -37,7 +37,8 @@ def process_date(args):
     power_curve = pd.read_csv('/home/wrfadmin/toolboxes/wind-science/files/wrf_lw15mw_power.csv')
     file_dir = '/home/coolgroup/ru-wrf/real-time/v4.1_parallel/processed_windturbs'
 
-    control_dir = "1km_wf2km_nyb"  # Adjust this if needed
+    control_dir = "1km_wf2km_nyb"
+    #control_dir = #1km_wf2km# # Adjust this if needed
 
     # Load turbine CSV file
     if expt == '1km_wf2km' or expt == '1km_wf2km_nyb_modsst':
@@ -52,7 +53,7 @@ def process_date(args):
     cumulative_power_total = 0
     cumulative_power_ctrl_total = 0
     cumulative_power_diff_total = 0
-
+ 
     for fname in files:
         if fname.split('_')[-1] == 'H000.nc':
             continue
@@ -80,17 +81,22 @@ def process_date(args):
             speed = np.sqrt(u**2 + v**2)
             speed_ctrl = np.sqrt(uctrl**2 + vctrl**2)
 
-            # get power from wind farm file in kW
-            power = ds.POWER.values / 1000
+            # initialize power arrays
+            power = np.zeros_like(ds.XLAT.values)
+            power_ctrl = np.zeros_like(ds.XLAT.values)
 
-            # calculate power from control file in kW
-            # find the turbine location indices
-            power_ctrl = np.array([])
+            # calculate power at each turbine location
             for i, row in turb_csv.iterrows():
                 a = np.abs(ds.XLAT.values - row.lat) + np.abs(ds.XLONG.values - row.lon)
                 i, j = np.unravel_index(a.argmin(), a.shape)
-                power_calc = np.interp(speed_ctrl[i, j], power_curve['Wind Speed'], power_curve['Power'])
-                power_ctrl = np.append(power_ctrl, power_calc)
+                
+                # calculate power at each turbine location
+                power_calc = np.interp(speed[i, j], power_curve['Wind Speed'], power_curve['Power'])
+                power[i, j] = power_calc
+
+                # calculate power from control file at each turbine location
+                power_ctrl_calc = np.interp(speed_ctrl[i, j], power_curve['Wind Speed'], power_curve['Power'])
+                power_ctrl[i, j] = power_ctrl_calc
 
             # calculate total wind farm power generated in GW
             cumulative_power = np.sum(power) / 1000000
