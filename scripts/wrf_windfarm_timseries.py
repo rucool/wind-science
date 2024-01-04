@@ -169,7 +169,7 @@ def main(args):
     ax1.plot(f_time_values_list, f_cumulative_power_values, label='Upwelling')
     ax1.plot(f_time_values_list, f_cumulative_power_ctrl_values, label='No Upwelling')
     ax1.set_ylabel('Cumulative Power (GW)')
-    ax1.set_title(f'{label_plot} Windfarm Hourly Power Production ({month})')
+    ax1.set_title(f'{label_plot} Windfarm Hourly Power Production ({month} 2022)')
     ax1.legend()  # Add legend for the first axis
     ax1.grid()
     # Add annotations to the corners
