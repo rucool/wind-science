@@ -172,12 +172,20 @@ def main(args):
     ax1.set_title(f'{label_plot} Windfarm Hourly Power Production ({month})')
     ax1.legend()  # Add legend for the first axis
     ax1.grid()
+    # Add annotations to the corners
+    ax1.text(0.22, 0.95, f'Total w/ Upwelling: {f_cumulative_power_total:.2f} GW',
+        transform=ax1.transAxes, ha='right', va='top', bbox=dict(facecolor='white', alpha=0.8))
+    ax1.text(0.22, 0.85, f'Total No Upwelling: {f_cumulative_power_ctrl_total:.2f} GW',
+        transform=ax1.transAxes, ha='right', va='top', bbox=dict(facecolor='white', alpha=0.8))
 
     ax2.plot(f_time_values_list, f_cumulative_power_diff_values, label='Cumulative Power Difference', color='orange')
     ax2.set_xlabel('Time')
     ax2.set_ylabel('Hourly Power Difference (GW)')
     ax2.legend()  # Add legend for the second axis
     ax2.grid()
+    ax2.text(0.18, 0.95, f'Total Difference: {f_cumulative_power_diff_total:.2f} GW',
+         transform=ax2.transAxes, ha='right', va='top', bbox=dict(facecolor='white', alpha=0.8))
+    # Set x-axis ticks to display only the day of the month
     # Set x-axis ticks to display only the day of the month
     ax2.xaxis.set_major_locator(DayLocator())
     ax2.xaxis.set_major_formatter(DateFormatter('%m/%d/%y'))
