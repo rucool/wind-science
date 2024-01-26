@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 4/25/2023
-Last modified: Lori Garzio 9/25/2023
+Last modified: Lori Garzio 1/26/2024
 Grab U and V data at 10m and 160m from THREDDS for a user-defined time-range, calculate monthly averages and standard
 deviation and export as NetCDF.
 """
@@ -176,7 +176,13 @@ def main(args):
             ('references', 'https://rucool.marine.rutgers.edu/research/offshore-wind/'),
             ('MAP_PROJ_CHAR', ds.MAP_PROJ_CHAR),
             ('CEN_LAT', ds.CEN_LAT),
-            ('CEN_LON', ds.CEN_LON)
+            ('CEN_LON', ds.CEN_LON),
+            ('TRUELAT1', ds.TRUELAT1),
+            ('TRUELAT2', ds.TRUELAT2),
+            ('MOAD_CEN_LAT', ds.MOAD_CEN_LAT),
+            ('STAND_LON', ds.STAND_LON),
+            ('DX', ds.DX),
+            ('DY', ds.DY)
         ])
 
         global_attributes.update(outds.attrs)
