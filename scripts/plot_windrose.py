@@ -307,7 +307,7 @@ if __name__ == '__main__':
                             dest='interval',
                             default='monthly',
                             type=str,
-                            choices=['monthly', 'seasonal', 'none', 'seabreeze', 'summers', 'months'],
+                            choices=['monthly', 'seasonal', 'none', 'seabreeze', 'summers', 'months', 'upwelling'],
                             help='Interval into which the time range provided is divided. If "none", the entire time '
                                  'range provided is grouped into one windrose. If "seabreeze" the entire time range'
                                  'provided is broken into seabreeze and non-seabreeze days. If "summers" the entire'
