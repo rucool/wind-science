@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 3/13/2023
-Last modified: 9/15/2023
+Last modified: 3/26/2024
 Creates wind rose plots from WRF data at user-defined time intervals, heights, and locations.
 """
 
@@ -136,6 +136,11 @@ def main(args):
         sb_times = sb_times[np.logical_and(sb_times >= start_date, sb_times <= end_date)]
         nosb_times = nosb_times[np.logical_and(nosb_times >= start_date, nosb_times <= end_date)]
         intervals = [sb_times, nosb_times]
+    elif interval == 'upwelling':  # break up date range into upwelling and non-upwelling days
+        up_times, noup_times = cf.return_upwelling_datetimes(csvfile='/Users/garzio/Documents/repo/rucool/wind-science/files/NJUpwellingforBPU.csv')
+        up_times = up_times[np.logical_and(up_times >= start_date, up_times <= end_date)]
+        noup_times = noup_times[np.logical_and(noup_times >= start_date, noup_times <= end_date)]
+        intervals = [up_times, noup_times]
     elif interval == 'summers':
         months = ds['time.month']
         intervals = list(np.where((months == 6) | (months == 7) | (months == 8)))
@@ -155,10 +160,10 @@ def main(args):
             dst = ds.sel(time=intvl)
             if i_intvl == 0:
                 version = 'seabreeze'
-                ttl_version = f'Seabreeze Days (n={int(len(dst.time)/24)})'
+                ttl_version = f'Seabreeze Days (n={int(len(dst.time) / 24)})'
             else:
                 version = 'noseabreeze'
-                ttl_version = f'Non-Seabreeze Days (n={int(len(dst.time)/24)})'
+                ttl_version = f'Non-Seabreeze Days (n={int(len(dst.time) / 24)})'
 
             if len(dst.time) == 0:
                 raise ValueError(f'No data found for: {domain} {version}, {start_date.strftime("%Y%m%d")} to {end_date.strftime("%Y%m%d")}')
@@ -167,6 +172,26 @@ def main(args):
             if np.logical_and(start_str == '20200601', end_str == '20220831'):
                 title_dt = f'{ttl_version}\nJune-July-Aug 2020-2022'
                 save_dt = f'summers2020_2022_{version}'
+            else:
+                title_dt = f'{ttl_version}\n{start_date.strftime("%Y-%m-%d")} to {end_date.strftime("%Y-%m-%d")}'
+                save_dt = f'{start_date.strftime("%Y%m%d")}_{end_date.strftime("%Y%m%d")}_{version}'
+        elif interval == 'upwelling':
+            dst = ds.sel(time=intvl)
+            if i_intvl == 0:
+                version = 'upwell'
+                ttl_version = f'Upwelling Days (n={int(len(dst.time) / 24)})'
+            else:
+                version = 'noupwell'
+                ttl_version = f'Non-Upwelling Days (n={int(len(dst.time) / 24)})'
+
+            if len(dst.time) == 0:
+                raise ValueError(
+                    f'No data found for: {domain} {version}, {start_date.strftime("%Y%m%d")} to {end_date.strftime("%Y%m%d")}')
+
+            # define title and save names
+            if np.logical_and(start_str == '20190601', end_str == '20220831'):
+                title_dt = f'{ttl_version}\nJune-July-Aug 2019-2022'
+                save_dt = f'summers2019_2022_{version}'
             else:
                 title_dt = f'{ttl_version}\n{start_date.strftime("%Y-%m-%d")} to {end_date.strftime("%Y-%m-%d")}'
                 save_dt = f'{start_date.strftime("%Y%m%d")}_{end_date.strftime("%Y%m%d")}_{version}'
