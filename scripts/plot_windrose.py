@@ -137,7 +137,7 @@ def main(args):
         nosb_times = nosb_times[np.logical_and(nosb_times >= start_date, nosb_times <= end_date)]
         intervals = [sb_times, nosb_times]
     elif interval == 'upwelling':  # break up date range into upwelling and non-upwelling days
-        up_times, noup_times = cf.return_upwelling_datetimes(csvfile='/Users/garzio/Documents/repo/rucool/wind-science/files/NJUpwellingforBPU.csv')
+        up_times, noup_times = cf.return_upwelling_datetimes()
         up_times = up_times[np.logical_and(up_times >= start_date, up_times <= end_date)]
         noup_times = noup_times[np.logical_and(noup_times >= start_date, noup_times <= end_date)]
         intervals = [up_times, noup_times]
