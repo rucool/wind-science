@@ -51,6 +51,35 @@ def return_seabreeze_datetimes(csvfile='/home/wrfadmin/toolboxes/wind-science/fi
     return sb_datetimes, nosb_datetimes
 
 
+def return_upwelling_datetimes(csvfile='/home/wrfadmin/toolboxes/wind-science/files/NJUpwellingforBPU.csv'):
+    """
+    Returns two datetime indices of upwelling vs non-upwelling days at hourly intervals (to match WRF output)
+    csvfile: csv file containing upwelling and non-upwelling days, default is ../files/NJUpwellingforBPU.csv file
+    """
+    df = pd.read_csv(csvfile)
+
+    # drop May
+    df = df[df.Month != 'May']
+
+    # get seabreeze datetimes
+    df['Month'] = df['Month'].map(lambda x: dt.datetime.strptime(x, '%B').month)
+    df['date'] = pd.to_datetime(dict(year=df.Year, month=df.Month, day=df.Day))
+    df_up = df[df['AVHRR'] == 1]
+    up_dates = np.array(pd.to_datetime(df_up['date']))
+    up_datetimes = [pd.date_range(pd.to_datetime(x), pd.to_datetime(x) + dt.timedelta(hours=23), freq='H') for x in
+                    up_dates]
+    up_datetimes = pd.to_datetime(sorted([inner for outer in up_datetimes for inner in outer]))
+
+    # get non-seabreeze datetimes
+    df_noup = df[df['AVHRR'] == 0]
+    noup_dates = np.array(pd.to_datetime(df_noup['date']))
+    noup_datetimes = [pd.date_range(pd.to_datetime(x), pd.to_datetime(x) + dt.timedelta(hours=23), freq='H') for x
+                      in noup_dates]
+    noup_datetimes = pd.to_datetime(sorted([inner for outer in noup_datetimes for inner in outer]))
+
+    return up_datetimes, noup_datetimes
+
+
 def season_mapping(season_str):
     if season_str == 'DJF':
         season = 'Winter'
