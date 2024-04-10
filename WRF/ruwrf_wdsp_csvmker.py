@@ -3,7 +3,8 @@ import xarray as xr
 import pandas as pd
 import datetime as dt
 import argparse
-import functions.common as cf
+from functions import common as cf
+
 
 # Sample command line: python ruwrf_wdsp_csvmaker.py 2022 1 1 2022 1 3 160
 
