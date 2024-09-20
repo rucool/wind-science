@@ -149,7 +149,7 @@ if __name__ == '__main__':
                             help='Domain: operational 3km or 9km WRF domain, 1km with simulated windfarm (1km_wf2km), ' \
                                  '1km without simulated windfarm (1km_ctrl)')
 
-    arg_parser.add_argument('-h', '--heights',
+    arg_parser.add_argument('--heights',
                             dest='heights',
                             default=[120, 160, 200, 300],
                             type=list,
