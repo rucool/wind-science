@@ -131,19 +131,19 @@ if __name__ == '__main__':
 
     arg_parser.add_argument('-s', '--start',
                             dest='start',
-                            default='20190101',
+                            default='20220601',
                             type=str,
                             help='Start Date in format YYYYMMDD ')
 
     arg_parser.add_argument('-e', '--end',
                             dest='end',
-                            default='20221231',
+                            default='20220831',
                             type=str,
                             help='End Date in format YYYYMMDD')
 
     arg_parser.add_argument('-d', '--domain',
                             dest='domain',
-                            default='3km',
+                            default='1km_wf2km_nyb',
                             type=str,
                             choices=['3km', '9km', '1km_wf2km', '1km_ctrl'],
                             help='Domain: operational 3km or 9km WRF domain, 1km with simulated windfarm (1km_wf2km), ' \
