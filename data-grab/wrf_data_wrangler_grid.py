@@ -145,7 +145,7 @@ if __name__ == '__main__':
                             dest='domain',
                             default='1km_wf2km_nyb',
                             type=str,
-                            choices=['3km', '9km', '1km_wf2km', '1km_ctrl'],
+                            choices=['3km', '9km', '1km_wf2km', '1km_ctrl', '1km_wf2km_nyb'],
                             help='Domain: operational 3km or 9km WRF domain, 1km with simulated windfarm (1km_wf2km), ' \
                                  '1km without simulated windfarm (1km_ctrl)')
 
