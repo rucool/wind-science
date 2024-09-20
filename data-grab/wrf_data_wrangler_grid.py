@@ -44,11 +44,8 @@ def main(args):
     else:
         raise ValueError('Invalid domain specified')
 
-    save_dir = os.path.join(save_dir, domain)
-    os.makedirs(save_dir, exist_ok=True)
-
     # set up log file
-    logfile = os.path.join(save_dir, f'{domain}_subset.log')
+    logfile = os.path.join(save_dir, f'{domain}_{start_str}_{end_str}_subsetting.log')
     logging = cf.setup_logger(f'logging_{domain}', loglevel, logfile)
 
     # check if a NetCDF file already exists
@@ -137,7 +134,7 @@ if __name__ == '__main__':
 
     arg_parser.add_argument('-e', '--end',
                             dest='end',
-                            default='20220831',
+                            default='20220630',
                             type=str,
                             help='End Date in format YYYYMMDD')
 
