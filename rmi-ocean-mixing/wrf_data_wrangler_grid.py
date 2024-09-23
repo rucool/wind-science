@@ -26,7 +26,13 @@ def main(args):
     save_dir = args.save_dir
     loglevel = args.loglevel.upper()
 
-    subset_vars = ['T2', 'U', 'V', 'U10', 'V10', 'LANDMASK', 'LAKEMASK', 'UST', 'QVAPOR', 'TKE_PBL', 'TEMP']
+    #subset_vars = ['T2', 'U', 'V', 'U10', 'V10', 'LANDMASK', 'LAKEMASK', 'UST', 'QVAPOR', 'TKE_PBL', 'TEMP']
+
+    file_names = ['temperature', 'ws', 'UST', 'QVAPOR', 'TKE_PBL', 'HFX']
+    subset_vars = [['T2', 'TEMP'], ['U', 'V', 'U10', 'V10'], ['UST'], ['QVAPOR'], ['TKE_PBL'], ['HFX']]
+
+    #file_names = ['HFX']
+    #subset_vars = [['HFX']]
 
     start_date = dt.datetime.strptime(start_str, '%Y%m%d')
     end_date = dt.datetime.strptime(end_str, '%Y%m%d') + dt.timedelta(hours=23)
@@ -44,25 +50,26 @@ def main(args):
     else:
         raise ValueError('Invalid domain specified')
 
+    save_dir = os.path.join(save_dir, domain)
+    os.makedirs(save_dir, exist_ok=True)
+
     # set up log file
     logfile = os.path.join(save_dir, f'{domain}_{start_str}_{end_str}_subsetting.log')
     logging = cf.setup_logger(f'logging_{domain}', loglevel, logfile)
 
-    # check if a NetCDF file already exists
-    save_file = os.path.join(save_dir, f'ruwrf_{domain}_{start_str}_{end_str}.nc')
-    if os.path.isfile(save_file):
-        logging.warning(f'File for {domain} subset file already exists: {save_file}')
-    else:
-        logging.info(f'Subsetting WRF THREDDS {domain} dataset: {start_str} to {end_str}')
-        ds = xr.open_dataset(mlink)
-        ds = ds.sel(time=slice(start_date, end_date), height=heights)
-        ds = ds[subset_vars]
+    ds = xr.open_dataset(mlink)
+    ds = ds.sel(time=slice(start_date, end_date), height=heights)
+    for i, sv in enumerate(subset_vars):
+        # subset data for each variable group
+        save_file = os.path.join(save_dir, f'ruwrf_{domain}_{file_names[i]}_{start_str}_{end_str}.nc')
+        logging.info(f'Subsetting WRF THREDDS {domain} variables: {sv} {start_str} to {end_str}')
+        ds2 = ds[sv]
 
         # add created time to global attrs
         datetime_format = '%Y-%m-%dT%H:%M:%SZ'
         created = dt.datetime.utcnow().strftime(datetime_format)  # creation time Timestamp
-        time_start = pd.to_datetime(np.nanmin(ds.time.values)).strftime(datetime_format)
-        time_end = pd.to_datetime(np.nanmax(ds.time.values)).strftime(datetime_format)
+        time_start = pd.to_datetime(np.nanmin(ds2.time.values)).strftime(datetime_format)
+        time_end = pd.to_datetime(np.nanmax(ds2.time.values)).strftime(datetime_format)
 
         ga_comment = f'Subset model output from RU-WRF {domain} dataset from {start_str} to {end_str}'
 
@@ -102,25 +109,27 @@ def main(args):
             ('DY', ds.DY)
         ])
 
-        global_attributes.update(ds.attrs)
+        global_attributes.update(ds2.attrs)
 
-        ds = ds.assign_attrs(global_attributes)
+        ds2 = ds2.assign_attrs(global_attributes)
 
         # Add compression to all variables
         encoding = {}
-        for k in ds.data_vars:
+        for k in ds2.data_vars:
             # print(k)
-            # edict = ds[k].encoding
+            # edict = ds2[k].encoding
             # edict.update({'zlib': True, 'complevel': 1})
             # encoding[k] = edict
             encoding[k] = {'zlib': True, 'complevel': 1}
 
         # save .nc file
-        ds.to_netcdf(save_file, encoding=encoding, format='netCDF4', engine='netcdf4')
-        logging.info(f'Finished subsetting for {domain} dataset: {start_str} to {end_str}')
-        overall_start = pd.to_datetime(np.nanmin(ds.time.values)).strftime('%Y-%m-%dT%H:%M')
-        overall_end = pd.to_datetime(np.nanmax(ds.time.values)).strftime('%Y-%m-%dT%H:%M')
+        ds2.to_netcdf(save_file, encoding=encoding, format='netCDF4', engine='netcdf4')
+        logging.info(f'Finished subsetting {domain} variables: {sv} {start_str} to {end_str}')
+        overall_start = pd.to_datetime(np.nanmin(ds2.time.values)).strftime('%Y-%m-%dT%H:%M')
+        overall_end = pd.to_datetime(np.nanmax(ds2.time.values)).strftime('%Y-%m-%dT%H:%M')
         logging.info(f'Date range in {save_file}: {overall_start} to {overall_end}')
+
+    logging.info('Process finished')
 
 
 if __name__ == '__main__':
