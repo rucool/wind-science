@@ -26,8 +26,8 @@ def main(args):
     save_dir = args.save_dir
     loglevel = args.loglevel.upper()
 
-    file_names = ['T2', 'TEMP', 'ws', 'UST', 'Q2', 'TKE_PBL', 'HFX']
-    subset_vars = [['T2'], ['TEMP'], ['U', 'V', 'U10', 'V10'], ['UST'], ['Q2'], ['TKE_PBL'], ['HFX']]
+    file_names = ['T2', 'TEMP', 'ws', 'ws10', 'UST', 'Q2', 'TKE_PBL', 'HFX']
+    subset_vars = [['T2'], ['TEMP'], ['U', 'V'], ['U10', 'V10'], ['UST'], ['Q2'], ['TKE_PBL'], ['HFX']]
 
     start_date = dt.datetime.strptime(start_str, '%Y%m%d')
     end_date = dt.datetime.strptime(end_str, '%Y%m%d') + dt.timedelta(hours=23)
