@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 4/25/2023
-Last modified: Lori Garzio 9/20/2024
+Last modified: Lori Garzio 9/25/2024
 Grab WRF data (entire domain) from THREDDS for a user-defined time-range and export as NetCDF.
 """
 
@@ -26,13 +26,8 @@ def main(args):
     save_dir = args.save_dir
     loglevel = args.loglevel.upper()
 
-    #subset_vars = ['T2', 'U', 'V', 'U10', 'V10', 'LANDMASK', 'LAKEMASK', 'UST', 'QVAPOR', 'TKE_PBL', 'TEMP']
-
-    file_names = ['temperature', 'ws', 'UST', 'QVAPOR', 'TKE_PBL', 'HFX']
-    subset_vars = [['T2', 'TEMP'], ['U', 'V', 'U10', 'V10'], ['UST'], ['QVAPOR'], ['TKE_PBL'], ['HFX']]
-
-    #file_names = ['HFX']
-    #subset_vars = [['HFX']]
+    file_names = ['T2', 'TEMP', 'ws', 'UST', 'Q2', 'TKE_PBL', 'HFX']
+    subset_vars = [['T2'], ['TEMP'], ['U', 'V', 'U10', 'V10'], ['UST'], ['Q2'], ['TKE_PBL'], ['HFX']]
 
     start_date = dt.datetime.strptime(start_str, '%Y%m%d')
     end_date = dt.datetime.strptime(end_str, '%Y%m%d') + dt.timedelta(hours=23)
