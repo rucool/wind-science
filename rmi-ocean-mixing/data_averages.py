@@ -43,11 +43,13 @@ def main(start_str, end_str, ver, v):
 
         ds[v] = cf.wind_uv_to_spd(uvector, vvector)
         ds[v].attrs['units'] = uvector.attrs['units']
+        ds[v].attrs['long_name'] = 'Wind Speed'
 
     varname = f'{v}_avg'
     ds[varname] = ds[v].mean(dim='time')
     ds[varname].attrs['units'] = ds[v].attrs['units']
     ds[varname].attrs['comment'] = f'{v} average from {start_str} to {end_str}'
+    ds[varname].attrs['long_name'] = f'Average {ds[v].attrs["long_name"]}'
 
     # Add compression to all variables
     encoding = {}
