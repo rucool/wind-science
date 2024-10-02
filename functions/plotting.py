@@ -7,7 +7,7 @@ from cartopy.io.shapereader import Reader
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
-def add_contours(ax, londata, latdata, vardata, clist, label_format=None):
+def add_contours(ax, londata, latdata, vardata, clist, label_format=None, color='black', linewidth=.5, linestyle='-'):
     """
     Adds black contour lines with labels to a cartopy map object
     :param ax: plotting axis object
@@ -19,7 +19,8 @@ def add_contours(ax, londata, latdata, vardata, clist, label_format=None):
     """
     label_format = label_format or '%d'
 
-    CS = ax.contour(londata, latdata, vardata, clist, colors='black', linewidths=.5, transform=ccrs.PlateCarree())
+    CS = ax.contour(londata, latdata, vardata, clist, colors=color, linewidths=linewidth,
+                    linestyle=linestyle, transform=ccrs.PlateCarree())
     ax.clabel(CS, inline=True, fontsize=10.5, fmt=label_format)
 
 
