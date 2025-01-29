@@ -26,8 +26,8 @@ def main(args):
     save_dir = args.save_dir
     loglevel = args.loglevel.upper()
 
-    file_names = ['T2', 'TEMP', 'ws', 'ws10', 'UST', 'Q2', 'TKE_PBL', 'HFX']
-    subset_vars = [['T2'], ['TEMP'], ['U', 'V'], ['U10', 'V10'], ['UST'], ['Q2'], ['TKE_PBL'], ['HFX']]
+    file_names = ['T2', 'TEMP', 'ws', 'ws10', 'UST', 'Q2', 'TKE_PBL', 'HFX', 'TSK']
+    subset_vars = [['T2'], ['TEMP'], ['U', 'V'], ['U10', 'V10'], ['UST'], ['Q2'], ['TKE_PBL'], ['HFX'], ['TSK']]
 
     start_date = dt.datetime.strptime(start_str, '%Y%m%d')
     end_date = dt.datetime.strptime(end_str, '%Y%m%d') + dt.timedelta(hours=23)
@@ -148,7 +148,9 @@ if __name__ == '__main__':
                             type=str,
                             choices=['3km', '9km', '1km_wf2km', '1km_ctrl', '1km_wf2km_nyb'],
                             help='Domain: operational 3km or 9km WRF domain, 1km with simulated windfarm (1km_wf2km), ' \
-                                 '1km without simulated windfarm (1km_ctrl)')
+                                 '1km without simulated windfarm (1km_ctrl), 1km with simulated windfarm - turbines '
+                                 'spaced 2km apart and filling all wind energy lease areas in the New York Bight as of '
+                                 'early 2023 (1km_wf2km_nyb)')
 
     arg_parser.add_argument('--heights',
                             dest='heights',
