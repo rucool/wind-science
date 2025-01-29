@@ -134,6 +134,7 @@ def main(variable, h, coastline, plot_region, save_dir):
         save_file = f'{v}_avg-1km_wf2km_nyb-surfacemap.png'
     ax.set_title(title, pad=8)
 
+    # shapefiles downloaded from the BOEM website: https://www.boem.gov/renewable-energy/mapping-and-data/renewable-energy-gis-data
     lease = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/BOEM-Renewable-Energy-Shapefiles_11_2_2022/Wind_Lease_Outlines_11_2_2022.shp'
     #lease = glob.glob('/home/coolgroup/bpu/mapdata/shapefiles/BOEM-Renewable-Energy-Shapefiles-current/Wind_Lease_Outlines*.shp')[0]
     oargs = dict()
