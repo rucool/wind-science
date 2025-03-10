@@ -47,5 +47,19 @@ The resulting data files from steps 1-2 are available [here](https://marine.rutg
 	- Difference (turbines minus control)
 	- Proportion reduction of turbines compared to the control (difference divided by control)
 
+4. [surface\_map_tutorial.ipynb](https://github.com/rucool/wind-science/blob/master/rmi-ocean-mixing/surface_map_tutorial.ipynb): Jupyter notebook tutorial for generating surface maps from [files](https://marine.rutgers.edu/~lgarzio/rmi_ocean_mixing/) containing summer 2022 average model output. To run a Jupyter notebook you can either use a Python IDE that supports Jupyter (e.g. [VS Code](https://code.visualstudio.com/)), or in your terminal navigate to the location that you downloaded wind-science/rmi-ocean-mixing:
+
+`cd /Users/lgarzio/Documents/repo/wind-science/rmi-ocean-mixing`
+
+Activate your environment:
+
+`conda activate rmi-ocean-mixing`
+
+Type jupyter notebook:
+
+`jupyter notebook`
+
+This will start a Jupyter Server in your browser that serves those notebooks in your local directory. You can click on the surface_map_tutorial.ipynb in your browser window to run through the tutorial to generate your own maps. To shut down the Jupyter server, close the windows in your browser and type Ctrl+C in your terminal.
+
 ## Acknowledgement
 This work was supported by the New Jersey Research and Monitoring Initiative (RMI): New Jersey Board of Public Utilities (NJBPU) and New Jersey Department of Environmental Protection (NJDEP)
