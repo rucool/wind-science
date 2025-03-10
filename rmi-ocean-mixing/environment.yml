@@ -1,0 +1,15 @@
+name: rmi-ocean-mixing
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python==3.13.2
+  - numpy==2.2.3
+  - pandas==2.2.3
+  - xarray==2025.1.2
+  - netCDF4==1.7.2
+  - cartopy==0.24.0
+  - erddapy==2.2.3
+  - cool_maps==1.0.1
+  - matplotlib==3.10.1
+  - jupyter==1.1.1
