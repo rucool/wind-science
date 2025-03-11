@@ -14,13 +14,31 @@ import xarray as xr
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from matplotlib.colors import BoundaryNorm
-from matplotlib.colors import TwoSlopeNorm
-from matplotlib.colors import ListedColormap
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+from cartopy.io.shapereader import Reader
 import cmocean as cmo
 from math import ceil
 import cool_maps.plot as cplt
-import functions.plotting as pf
 plt.rcParams.update({'font.size': 12})  # all font sizes are 12 unless otherwise specified
+
+
+def add_contours(ax, londata, latdata, vardata, clist, label_format=None, color='black', linewidth=.5, linestyle='-'):
+    """
+    Adds black contour lines with labels to a cartopy map object
+    :param ax: plotting axis object
+    :param londata: longitude data
+    :param latdata: latitude data
+    :param vardata: variable data
+    :param clist: list of contour levels
+    :param label_format: optional format for contour labels (e.g. '%.1f')
+    """
+    label_format = label_format or '%d'
+
+    CS = ax.contour(londata, latdata, vardata, clist, colors=color, linewidths=linewidth,
+                    linestyle=linestyle, transform=ccrs.PlateCarree())
+    ax.clabel(CS, inline=True, fontsize=10.5, fmt=label_format)
 
 
 def subset_grid(ext, data, lon_name, lat_name):
@@ -42,9 +60,66 @@ def subset_grid(ext, data, lon_name, lat_name):
     return data_sub, lon, lat
 
 
-def main(variable, h, coastline, plot_region, save_dir):
-    plt_region = pf.plot_regions()
-    extent = plt_region[plot_region]['extent']
+def map_add_boem_outlines(ax, shpfile, edgecolor=None, facecolor=None, projection=None, zorder=None, alpha=None,
+                          linewidth=1):
+    edgecolor = edgecolor or 'black'
+    facecolor = facecolor or 'none'
+    projection = projection or ccrs.PlateCarree()
+    zorder = zorder or 1
+    alpha = alpha or 1
+
+    shape_feature = cfeature.ShapelyFeature(
+        Reader(shpfile).geometries(),
+        projection,
+        edgecolor=edgecolor,
+        facecolor=facecolor,
+        linewidth=linewidth
+        )
+
+    ax.add_feature(shape_feature, zorder=zorder, alpha=alpha)
+
+    return shape_feature._geoms
+
+
+def plot_pcolormesh(fig, ax, lon_data, lat_data, var_data, cmap='jet', clab=None, var_lims=None,
+                    norm_clevs=None, extend='neither', cbar_ticks=None, shading='nearest'):
+    """
+    Create a pseudocolor plot
+    :param fig: figure object
+    :param ax: plotting axis object
+    :param lon_data: longitude data
+    :param lat_data: latitude data
+    :param var_data: variable data
+    :param cmap: optional color map, default is 'jet'
+    :param clab: optional colorbar label
+    :param var_lims: optional, [minimum, maximum] values for plotting (for fixed colorbar)
+    :param norm_clevs: optional normalized levels
+    :param extend: optional extend the colorbar, default is 'neither'
+    """
+
+    plt.subplots_adjust(right=0.88)
+    divider = make_axes_locatable(ax)
+    cax = divider.new_horizontal(size='5%', pad=0.1, axes_class=plt.Axes)
+    fig.add_axes(cax)
+
+    if var_lims:
+        h = ax.pcolormesh(lon_data, lat_data, var_data, vmin=var_lims[0], vmax=var_lims[1],  cmap=cmap,
+                          transform=ccrs.PlateCarree())
+    elif norm_clevs:
+        h = ax.pcolormesh(lon_data, lat_data, var_data, cmap=cmap, norm=norm_clevs,
+                          transform=ccrs.PlateCarree(), shading=shading)
+    else:
+        h = ax.pcolormesh(lon_data, lat_data, var_data, cmap=cmap, transform=ccrs.PlateCarree())
+
+    cb = plt.colorbar(h, cax=cax, extend=extend)
+    if clab:
+        cb.set_label(label=clab, fontsize=14)
+    if cbar_ticks != 'none':
+        cb.ticks = cbar_ticks
+
+
+def main(variable, h, coastline, save_dir):
+    extent = [-75.1, -72.2, 38.1, 40.5]
 
     f = f'/Users/garzio/Documents/rucool/Miles/RMI/2024_Ocean_Mixing/data/1km_wf2km_nyb/ruwrf_1km_wf2km_nyb_{variable}_avg_20220601_20220831.nc'
     fc = f'/Users/garzio/Documents/rucool/Miles/RMI/2024_Ocean_Mixing/data/1km_ctrl/ruwrf_1km_ctrl_{variable}_avg_20220601_20220831.nc'
@@ -124,7 +199,7 @@ def main(variable, h, coastline, plot_region, save_dir):
     pargs['extend'] = 'neither'
     pargs['cmap'] = cmap
     pargs['clab'] = color_label
-    pf.plot_pcolormesh(fig, ax, lon, lat, vsub.values, **pargs)
+    plot_pcolormesh(fig, ax, lon, lat, vsub.values, **pargs)
 
     if h:
         title = f'{vsub.long_name} {h}m: Wind Farm\nSummer 2022'
@@ -139,14 +214,14 @@ def main(variable, h, coastline, plot_region, save_dir):
     #lease = glob.glob('/home/coolgroup/bpu/mapdata/shapefiles/BOEM-Renewable-Energy-Shapefiles-current/Wind_Lease_Outlines*.shp')[0]
     oargs = dict()
     oargs['edgecolor'] = 'magenta'
-    pf.map_add_boem_outlines(ax, lease, **oargs)
+    map_add_boem_outlines(ax, lease, **oargs)
 
     plt.savefig(os.path.join(save_dir, save_file), dpi=200)
 
 ######################################################################################################################
     # plot average: control
-    pf.plot_pcolormesh(fig, ax, lon, lat, vctrlsub.values, **pargs)
-    pf.map_add_boem_outlines(ax, lease, **oargs)
+    plot_pcolormesh(fig, ax, lon, lat, vctrlsub.values, **pargs)
+    map_add_boem_outlines(ax, lease, **oargs)
 
     if h:
         title = f'{vctrlsub.long_name} {h}m: Control\nSummer 2022'
@@ -197,36 +272,36 @@ def main(variable, h, coastline, plot_region, save_dir):
 
     if v in ['ws', 'ws10']:
         contour_list = [-0.5]
-        pf.add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.1f', color='red', linewidth=1, linestyle='--')
+        add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.1f', color='red', linewidth=1, linestyle='--')
     if v in ['UST']:
         contour_list = [-0.02]
-        pf.add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.2f', color='red', linewidth=1, linestyle='--')
+        add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.2f', color='red', linewidth=1, linestyle='--')
         contour_list = [-0.024]
-        pf.add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.2f', color='blue', linewidth=1,
+        add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.2f', color='blue', linewidth=1,
                         linestyle='--')
     # if v in ['TKE_PBL']:
     #     contour_list = [-0.05]
-    #     pf.add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.2f', color='red', linewidth=1, linestyle='--')
+    #     add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.2f', color='red', linewidth=1, linestyle='--')
     if v in ['TEMP']:
         contour_list = [-.1, .1]
-        pf.add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.1f', color='blue', linewidth=1,
+        add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.1f', color='blue', linewidth=1,
                         linestyle='--')
     if v in ['T2', 'TSK']:
         contour_list = [-.05, .05]
-        pf.add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.2f', color='blue', linewidth=1,
+        add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.2f', color='blue', linewidth=1,
                         linestyle='--')
     if v in ['HFX']:
         contour_list = [.5]
-        pf.add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.2f', color='blue', linewidth=1,
+        add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.2f', color='blue', linewidth=1,
                         linestyle='--')
     if v in ['Q2']:
         plt.subplots_adjust(right=.9, left=0.05)
 
-    pf.plot_pcolormesh(fig, ax, lon, lat, masked_diff, **pargs)
+    plot_pcolormesh(fig, ax, lon, lat, masked_diff, **pargs)
 
     oargs = dict()
     oargs['edgecolor'] = 'gray'
-    pf.map_add_boem_outlines(ax, lease, **oargs)
+    map_add_boem_outlines(ax, lease, **oargs)
 
     if h:
         title = f'{diff.long_name} {h}m (wind farm - control)\nSummer 2022'
@@ -284,25 +359,25 @@ def main(variable, h, coastline, plot_region, save_dir):
 
     if v in ['ws', 'ws10', 'UST']:
         contour_list = [-0.05]
-        pf.add_contours(ax, lon, lat, prop, contour_list, label_format='%.2f', color='red', linewidth=1,
+        add_contours(ax, lon, lat, prop, contour_list, label_format='%.2f', color='red', linewidth=1,
                         linestyle='--')
         contour_list = [-0.2]
-        pf.add_contours(ax, lon, lat, prop, contour_list, label_format='%.2f', color='cyan', linewidth=1,
+        add_contours(ax, lon, lat, prop, contour_list, label_format='%.2f', color='cyan', linewidth=1,
                         linestyle='--')
     if v in ['Q2']:
         contour_list = [-0.005]
-        pf.add_contours(ax, lon, lat, prop, contour_list, label_format='%.3f', color='red', linewidth=1,
+        add_contours(ax, lon, lat, prop, contour_list, label_format='%.3f', color='red', linewidth=1,
                         linestyle='--')
     # if v in ['TKE_PBL']:
     #     contour_list = [-0.1]
-    #     pf.add_contours(ax, lon, lat, prop, contour_list, label_format='%.2f', color='red', linewidth=1,
+    #     add_contours(ax, lon, lat, prop, contour_list, label_format='%.2f', color='red', linewidth=1,
     #                     linestyle='--')
 
-    pf.plot_pcolormesh(fig, ax, lon, lat, prop, **pargs)
+    plot_pcolormesh(fig, ax, lon, lat, prop, **pargs)
 
     oargs = dict()
     oargs['edgecolor'] = 'gray'
-    pf.map_add_boem_outlines(ax, lease, **oargs)
+    map_add_boem_outlines(ax, lease, **oargs)
 
     if h:
         title = f'{prop.long_name} {h}m\nSummer 2022'
@@ -321,6 +396,5 @@ if __name__ == '__main__':
     v = 'Q2'  # ws10 ws UST Q2 T2 TEMP TEMP TKE_PBL TKE_PBL HFX TSK
     height = 2  # 10 160 None 2 2 200 120 20 200 None None
     coast = 'full'  # full low
-    region = 'windturb_nyb'
     savedir = '/Users/garzio/Documents/rucool/Miles/RMI/2024_Ocean_Mixing/draft_plots_v3'
-    main(v, height, coast, region, savedir)
+    main(v, height, coast, savedir)
