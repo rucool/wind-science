@@ -31,6 +31,9 @@ Install the toolbox to the conda environment from the root directory of the wind
 The toolbox should now be installed to your conda environment.
 
 
+[BOEM shapefiles](https://github.com/rucool/wind-science/tree/master/rmi-ocean-mixing/BOEM_Renewable_Energy_Shapefiles_2_2023) were downloaded from the [Bureau of Ocean Energy Management Renewable Energy GIS Data website](https://www.boem.gov/renewable-energy/mapping-and-data/renewable-energy-gis-data) in February 2023.
+
+
 ## Scripts
 
 1. [wrf_data_wrangler_grid.py](https://github.com/rucool/wind-science/blob/master/rmi-ocean-mixing/wrf_data_wrangler_grid.py): Grabs RU-WRF output for a user-defined model domain/version and time range for a subset of variables and heights, and saves each file to a user-defined directory. For this analysis, we grabbed summer 2022 data monthly (June, July, August) from model domain/version 1km_ctrl (1km domain with no turbines) and 1km\_wf2km\_nyb (1km domain with a simulated windfarm including turbines spaced 2km apart and filling all wind energy lease areas in the New York Bight as of early 2023). This results in 3 NetCDF files (2022-06-01 to 2022-06-30, 2022-07-01 to 2022-07-31, and 2022-08-01 to 2022-08-31) for each variable. It's necessary to grab the data in small chunks because of the volume of model output.
