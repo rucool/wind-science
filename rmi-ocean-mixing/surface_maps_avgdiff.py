@@ -2,7 +2,7 @@
 
 """
 Author: Lori Garzio on 9/26/2024
-Last modified: 9/26/2024
+Last modified: 5/14/2025
 Plot surface maps of Summer 2022 averaged datasets for variables extracted from two versions of RU-WRF model output:
 a version with simulated turbines compared to a control version with no turbines. Also plot the calculated differences
 (turbines minus control).
@@ -42,6 +42,13 @@ def add_contours(ax, londata, latdata, vardata, clist, label_format=None, color=
 
 
 def subset_grid(ext, data, lon_name, lat_name):
+    """
+    This function subsets the model output to the defined boundaries
+    ext: list of boundaries [lon_min, lon_max, lat_min, lat_max]
+    data: xarray dataset array
+    lon_name: name of the longitude coordinate
+    lat_name: name of the latitude coordinate
+    """
     lonx = data[lon_name]
     laty = data[lat_name]
 
@@ -114,8 +121,8 @@ def plot_pcolormesh(fig, ax, lon_data, lat_data, var_data, cmap='jet', clab=None
     cb = plt.colorbar(h, cax=cax, extend=extend)
     if clab:
         cb.set_label(label=clab, fontsize=14)
-    if cbar_ticks != 'none':
-        cb.ticks = cbar_ticks
+    if cbar_ticks:
+        cb.set_ticks(cbar_ticks)
 
 
 def main(variable, h, coastline, save_dir):
@@ -138,7 +145,8 @@ def main(variable, h, coastline, save_dir):
     configs = dict(
         ws=dict(cmap=plt.get_cmap('BuPu'), diffcmap=plt.get_cmap('RdBu_r'), diffmask=[-0.1, 0.1], difflims=[-2, 2], diffbins=40),
         ws10=dict(cmap=plt.get_cmap('BuPu'), diffcmap=plt.get_cmap('RdBu_r'), diffmask=[-0.1, 0.1], difflims=[-2, 2], diffbins=40),
-        UST=dict(cmap=plt.get_cmap('YlGnBu'), diffcmap=plt.get_cmap('Spectral_r'), diffmask=[-0.01, 0.01], lims=[0.1, 0.3], bins=20, difflims=[-0.1, 0.1], diffbins=60),
+        #UST=dict(cmap=plt.get_cmap('YlGnBu'), diffcmap=plt.get_cmap('Spectral_r'), diffmask=[-0.01, 0.01], lims=[0.1, 0.3], bins=20, difflims=[-0.1, 0.1], diffbins=60),
+        UST=dict(cmap=plt.get_cmap('YlGnBu'), diffcmap=plt.get_cmap('RdBu_r'), diffmask=[-0.001, 0.001], lims=[0.1, 0.3], bins=20, difflims=[-0.04, 0.04], diffbins=60),
         Q2=dict(cmap=cmo.cm.rain, diffcmap=plt.get_cmap('BrBG'), diffmask=[-0.000025, 0.000025], lims=[0, 0.02], bins=20, difflims=[-0.00015, 0.00015], diffbins=20),
         T2=dict(cmap=cmo.cm.thermal, diffmask=[-0.01, 0.01], difflims=[-0.2, 0.2], diffbins=40),
         TEMP=dict(cmap=cmo.cm.thermal, diffmask=[-0.01, 0.01], difflims=[-0.2, 0.2], diffbins=40),
@@ -151,14 +159,14 @@ def main(variable, h, coastline, save_dir):
     vsub, lon, lat = subset_grid(extent, ds[varnameavg], 'XLONG', 'XLAT')
     vctrlsub, lon, lat = subset_grid(extent, dsc[varnameavg], 'XLONG', 'XLAT')
 
-    if v in ['TEMP', 'T2', 'TSK']:
-        ln = vsub.attrs['long_name']
-        vsub = vsub - 273.15  # convert from K to degrees C
-        vsub.attrs['units'] = 'deg_C'
-        vsub.attrs['long_name'] = ln
-        vctrlsub = vctrlsub - 273.15  # convert from K to degrees C
-        vctrlsub.attrs['units'] = 'deg_C'
-        vctrlsub.attrs['long_name'] = ln
+    #if v in ['TEMP', 'T2', 'TSK']:
+    #    ln = vsub.attrs['long_name']
+    #    vsub = vsub - 273.15  # convert from K to degrees C
+    #    vsub.attrs['units'] = 'deg_C'
+    #    vsub.attrs['long_name'] = ln
+    #    vctrlsub = vctrlsub - 273.15  # convert from K to degrees C
+    #    vctrlsub.attrs['units'] = 'deg_C'
+    #    vctrlsub.attrs['long_name'] = ln
 
     diff = vsub - vctrlsub
     print(f'diff range: [{str(np.round(np.nanmin(diff), 3))}, {str(np.round(np.nanmax(diff), 3))}]')
@@ -182,8 +190,13 @@ def main(variable, h, coastline, save_dir):
     cmap = vconfigs['cmap']
     levels = MaxNLocator(nbins=bins).tick_values(cmin, cmax)
     norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
-    color_label = f'{vsub.long_name} ({vsub.units})'
-
+    if vsub.units == 'm s-1':
+        unitslab = '($\\mathrm{{m}}\\ \\mathrm{{s}}^{{-1}}$)'
+    elif vsub.units == 'kg kg-1':
+        unitslab = '($\\mathrm{{kg}}\\ \\mathrm{{kg}}^{{-1}}$)'
+    else:
+        unitslab = f'({vsub.units})'
+    color_label = f'{vsub.long_name} {unitslab}'
 ######################################################################################################################
     # plot average: wind farm
     kwargs = dict()
@@ -207,7 +220,7 @@ def main(variable, h, coastline, save_dir):
     else:
         title = f'{vsub.long_name}: Wind Farm\nSummer 2022'
         save_file = f'{v}_avg-1km_wf2km_nyb-surfacemap.png'
-    ax.set_title(title, pad=8)
+    #ax.set_title(title, pad=8)
 
     # shapefiles downloaded from the BOEM website: https://www.boem.gov/renewable-energy/mapping-and-data/renewable-energy-gis-data
     lease = '/Users/garzio/Documents/rucool/bpu/wrf/lease_areas/BOEM-Renewable-Energy-Shapefiles_11_2_2022/Wind_Lease_Outlines_11_2_2022.shp'
@@ -230,7 +243,7 @@ def main(variable, h, coastline, save_dir):
         title = f'{vctrlsub.long_name}: Control\nSummer 2022'
         save_file = f'{v}_avg-1km_ctrl-surfacemap.png'
 
-    ax.set_title(title, pad=8)
+    #ax.set_title(title, pad=8)
     plt.savefig(os.path.join(save_dir, save_file), dpi=200)
     plt.close()
 
@@ -254,12 +267,26 @@ def main(variable, h, coastline, save_dir):
     levels = MaxNLocator(nbins=bins).tick_values(cmin, cmax)
     norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
     #norm = TwoSlopeNorm(vmin=cmin, vcenter=0, vmax=cmax)
-    color_label = f'{diff.long_name} ({diff.units})'
+
+    if diff.units == 'm s-1':
+        unitslab = '($\\mathrm{{m}}\\ \\mathrm{{s}}^{{-1}}$)'
+    elif diff.units == 'kg kg-1':
+        unitslab = '($\\mathrm{{kg}}\\ \\mathrm{{kg}}^{{-1}}$)'
+    elif diff.units == 'W m-2':
+        unitslab = '($\\mathrm{{W}}\\ \\mathrm{{m}}^{{-2}}$)'
+    else:
+        unitslab = f'({diff.units})'
+
+    if diff.long_name == 'Average UPWARD HEAT FLUX AT THE SURFACE Difference':
+        ln = 'Average Upward Heat Flux Difference'
+    else:
+        ln = diff.long_name
+    color_label = f'{ln} {unitslab}'
 
     kwargs = dict()
     kwargs['figsize'] = (8, 8)
     kwargs['oceancolor'] = 'none'
-    kwargs['landcolor'] = 'none'
+    kwargs['landcolor'] = 'white'
     kwargs['coast'] = coastline
     kwargs['decimal_degrees'] = True
     fig, ax = cplt.create(extent, **kwargs)
@@ -272,10 +299,11 @@ def main(variable, h, coastline, save_dir):
 
     if v in ['ws', 'ws10']:
         contour_list = [-0.5]
-        add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.1f', color='red', linewidth=1, linestyle='--')
+        add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.1f', color='magenta', linewidth=1, linestyle='--')
     if v in ['UST']:
+        pargs['cbar_ticks'] = [-0.04, -0.03, -0.02, -0.01, 0, 0.01, 0.02, 0.03, 0.04]
         contour_list = [-0.02]
-        add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.2f', color='red', linewidth=1, linestyle='--')
+        add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.2f', color='magenta', linewidth=1, linestyle='--')
         contour_list = [-0.024]
         add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.2f', color='blue', linewidth=1,
                         linestyle='--')
@@ -288,14 +316,15 @@ def main(variable, h, coastline, save_dir):
                         linestyle='--')
     if v in ['T2', 'TSK']:
         contour_list = [-.05, .05]
-        add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.2f', color='blue', linewidth=1,
+        add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.2f', color='magenta', linewidth=1,
                         linestyle='--')
     if v in ['HFX']:
-        contour_list = [.5]
-        add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.2f', color='blue', linewidth=1,
-                        linestyle='--')
+        pargs['cbar_ticks'] = [-1.5, -1, -0.5, 0, 0.5, 1, 1.5]
+    #     contour_list = [.5]
+    #     add_contours(ax, lon, lat, masked_diff, contour_list, label_format='%.2f', color='blue', linewidth=1,
+    #                     linestyle='--')
     if v in ['Q2']:
-        plt.subplots_adjust(right=.9, left=0.05)
+        pargs['cbar_ticks'] = [-0.00015, -0.0001, -0.00005, 0, 0.00005, 0.0001, 0.00015]
 
     plot_pcolormesh(fig, ax, lon, lat, masked_diff, **pargs)
 
@@ -310,7 +339,9 @@ def main(variable, h, coastline, save_dir):
         title = f'{diff.long_name} (wind farm - control)\nSummer 2022'
         save_file = f'{v}_avg-diff-surfacemap.png'
 
-    ax.set_title(title, pad=8)
+    #ax.set_title(title, pad=8)
+    if v in ['Q2']:
+        plt.subplots_adjust(right=.82, left=0.08)
     plt.savefig(os.path.join(save_dir, save_file), dpi=200)
 
     plt.close()
@@ -386,7 +417,7 @@ def main(variable, h, coastline, save_dir):
         title = f'{prop.long_name}\nSummer 2022'
         save_file = f'{v}_diff-proportion-surfacemap.png'
 
-    ax.set_title(title, pad=8)
+    #ax.set_title(title, pad=8)
     plt.savefig(os.path.join(save_dir, save_file), dpi=200)
 
     plt.close()
